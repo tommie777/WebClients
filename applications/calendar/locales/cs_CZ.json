@@ -5535,7 +5535,7 @@
         "Vyberte tarif, který vám nejlépe vyhovuje."
       ],
       "Choose your service to connect with": [
-        "Vyberte službu, se kterou se chcete propojit"
+        "Vyberte službu, kterou chcete propojit"
       ],
       "Clear data": [
         "Smazat data"
@@ -6748,6 +6748,12 @@
       ],
       "You’ve reached the limit of booking slots (${ numberOfSlots }/${ MAX_BOOKING_SLOTS })": [
         "Dosáhli jste limitu rezervačních termínů (${ numberOfSlots }/${ MAX_BOOKING_SLOTS })"
+      ],
+      "Enter code": [
+        "Zadejte kód"
+      ],
+      "If you lost access to your authenticator app, you can use 1 of the 16 backup recovery codes provided when your set up two-factor authentication. ${ learnMoreLink }": [
+        "Pokud jste ztratili přístup ke své ověřovací aplikaci, můžete použít jeden ze 16 záložních obnovovacích kódů, které jste obdrželi při nastavování dvoufázového ověřování. ${ learnMoreLink }"
       ]
     },
     "info": {
