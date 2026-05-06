@@ -1510,7 +1510,10 @@
         "Důvěřovat"
       ],
       "Trust key": [
-        "Důvěřovat klíči"
+        "Důvěřovat klíči",
+        "Důvěřovat klíčům",
+        "Důvěřovat klíčům",
+        "Důvěřovat klíčům"
       ],
       "Trust public key": [
         "Důvěřovat veřejnému klíči"
@@ -1706,6 +1709,9 @@
       ],
       "Zoom out": [
         "Oddálit"
+      ],
+      "Connect your email": [
+        "Připojte svůj e-mail"
       ]
     },
     "action": {
@@ -4347,6 +4353,12 @@
       ],
       "You’ve already created 10 aliases. Get unlimited aliases and 500 GB of storage with ${ BRAND_NAME } Unlimited.": [
         "Vytvořili jste již 10 aliasů. Získejte neomezený počet aliasů a 500 GB úložného prostoru s ${ BRAND_NAME } Unlimited."
+      ],
+      "Send and receive Gmail messages directly in ${ MAIL_APP_NAME }. Connect your address in ${ addressesSettingsLink }.": [
+        "Odesílejte a přijímejte zprávy Gmailu přímo v aplikaci ${ MAIL_APP_NAME }. Připojte svou adresu na stránce ${ addressesSettingsLink }."
+      ],
+      "We've started importing your last 180 days of emails from Gmail. We'll let you know when it's done.": [
+        "Zahájili jsme import vašich e-mailů za posledních 180 dnů z Gmailu. Po dokončení vám dáme vědět."
       ]
     },
     "description": {
@@ -5850,6 +5862,24 @@
       ],
       "Filter": [
         "Filtr"
+      ],
+      "Filter (${ activeState.dropdownActiveCount })": [
+        "Filtrovat (${ activeState.dropdownActiveCount })"
+      ],
+      "Filter and sort emails": [
+        "Filtrování a třídění e-mailů"
+      ],
+      "Has attachments": [
+        "S přílohami"
+      ],
+      "Read": [
+        "Přečtené"
+      ],
+      "Reset": [
+        "Resetovat"
+      ],
+      "Unread": [
+        "Nepřečtené"
       ]
     },
     "Filter Actions": {
@@ -7274,7 +7304,7 @@
         "Vyberte tarif, který vám nejlépe vyhovuje."
       ],
       "Choose your service to connect with": [
-        "Vyberte službu, se kterou se chcete propojit"
+        "Vyberte službu, kterou chcete propojit"
       ],
       "Clear browser data": [
         "Vyčistit data prohlížeče"
@@ -7805,10 +7835,7 @@
         "Inicializace..."
       ],
       "Insert image": [
-        "Vložit obrázek",
-        "Vložit obrázky",
-        "Vložit obrázky",
-        "Vložit obrázky"
+        "Vložit obrázek"
       ],
       "Insert link": [
         "Vložit odkaz"
@@ -9294,6 +9321,15 @@
       ],
       "You’re just a few clicks away from a clutter-free inbox": [
         "Od doručené pošty bez nepořádku vás dělí jen několik kliknutí"
+      ],
+      "Copy to clipboard": [
+        "Kopírovat do schránky"
+      ],
+      "Enter code": [
+        "Zadejte kód"
+      ],
+      "If you lost access to your authenticator app, you can use 1 of the 16 backup recovery codes provided when your set up two-factor authentication. ${ learnMoreLink }": [
+        "Pokud jste ztratili přístup ke své ověřovací aplikaci, můžete použít jeden ze 16 záložních obnovovacích kódů, které jste obdrželi při nastavování dvoufázového ověřování. ${ learnMoreLink }"
       ]
     },
     "info": {
@@ -10369,6 +10405,9 @@
       ],
       "ZIP code": [
         "PSČ"
+      ],
+      "Personal and work emails, plus important updates and notifications": [
+        "Osobní a pracovní e-maily, důležité novinky a upozornění"
       ]
     },
     "Label (begin date/advanced search)": {
@@ -12355,6 +12394,9 @@
       ],
       "Switch the services you use every day to your ${ BRAND_NAME } address for better security and privacy.": [
         "Převeďte služby, které denně používáte na svou adresu ${ BRAND_NAME } a zajistěte si tak lepší zabezpečení a ochranu soukromí."
+      ],
+      "Bring your existing emails into ${ MAIL_APP_NAME } so you can manage everything from one private inbox.": [
+        "Převeďte své stávající e-maily do ${ MAIL_APP_NAME }, abyste mohli spravovat vše z jednoho soukromého účtu."
       ]
     },
     "Onboarding modal": {

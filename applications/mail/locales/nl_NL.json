@@ -1499,7 +1499,8 @@
         "Vertrouwen"
       ],
       "Trust key": [
-        "Vertrouwde sleutel"
+        "Sleutel vertrouwen",
+        "Sleutels vertrouwen"
       ],
       "Trust public key": [
         "Publieke sleutel vertrouwen"
@@ -1693,6 +1694,9 @@
       ],
       "Zoom out": [
         "Zoom uit"
+      ],
+      "Reconnect to Gmail": [
+        "Opnieuw verbinden met Gmail"
       ]
     },
     "action": {
@@ -4217,6 +4221,69 @@
       ],
       "You’ve already created 10 aliases. Get unlimited aliases and 500 GB of storage with ${ BRAND_NAME } Unlimited.": [
         "U heeft al 10 aliassen aangemaakt. Krijg onbeperkte aliassen en 500 GB opslag met ${ BRAND_NAME } Unlimited."
+      ],
+      "Block Google's ability to profile you. Gmail can't see what you do in ${ MAIL_APP_NAME }": [
+        "Voorkom dat Google een profiel van u aanmaakt. Gmail kan niet zien wat u in ${ MAIL_APP_NAME } doet."
+      ],
+      "No ads. No trackers.": [
+        "Geen advertenties. Geen trackers."
+      ],
+      "This may happen if permissions were removed or your password changed.": [
+        "Dit kan gebeuren als de toegangsrechten zijn ingetrokken of als uw wachtwoord is gewijzigd."
+      ],
+      "To connect a different Gmail address, remove extra Gmail addresses forwarding to ${ BRAND_NAME }.": [
+        "Om een ander Gmail-adres te koppelen, verwijdert u de extra Gmail-adressen die naar ${ BRAND_NAME } worden doorgestuurd."
+      ],
+      "To connect up to ${ MAX_SYNC_PAID_USER } Gmail address, upgrade to ${ planName }.": [
+        "Om maximaal ${ MAX_SYNC_PAID_USER } Gmail-adres te koppelen, upgrade naar ${ planName }.",
+        "Om maximaal ${ MAX_SYNC_PAID_USER } Gmail-adressen te koppelen, upgrade naar ${ planName }."
+      ],
+      "To continue receiving and sending Gmail messages in ${ BRAND_NAME }, please reconnect your account.": [
+        "Om Gmail-berichten te kunnen blijven ontvangen en verzenden in ${ BRAND_NAME }, moet u uw account opnieuw koppelen."
+      ],
+      "To continue receiving and sending Gmail messages in ${ BRAND_NAME }, please reconnect your accounts.": [
+        "Om Gmail-berichten te kunnen blijven ontvangen en verzenden in ${ BRAND_NAME }, moet u uw accounts opnieuw koppelen."
+      ],
+      "Upgrade to ${ planName } to connect up to ${ MAX_SYNC_PAID_USER } accounts": [
+        "Upgrade naar ${ planName } om te koppelen met maximaal ${ MAX_SYNC_PAID_USER } accounts"
+      ],
+      "We can't access ${ boldEmails } anymore.": [
+        "We hebben geen toegang meer tot ${ boldEmails }."
+      ],
+      "We'll bring in your old emails and connect your Gmail to ${ MAIL_APP_NAME } so new messages appear automatically": [
+        "We halen uw oude e-mails op en koppelen uw Gmail-account aan ${ MAIL_APP_NAME }, zodat nieuwe berichten automatisch worden weergegeven"
+      ],
+      "You already have a Gmail address forwarding to ${ MAIL_APP_NAME }. Connect it below to send and receive emails directly from ${ MAIL_APP_NAME }.": [
+        "U hebt al een Gmail-adres dat wordt doorgestuurd naar ${ MAIL_APP_NAME }. Koppel het hieronder om e-mails rechtstreeks vanuit ${ MAIL_APP_NAME } te verzenden en te ontvangen."
+      ],
+      "You already have Gmail addresses forwarding to ${ MAIL_APP_NAME }. Connect one below to send and receive emails directly from ${ MAIL_APP_NAME }.": [
+        "U hebt al Gmail-adressen die worden doorgestuurd naar ${ MAIL_APP_NAME }. Koppel er één hieronder om e-mails rechtstreeks vanuit ${ MAIL_APP_NAME } te verzenden en te ontvangen."
+      ],
+      "You can now send emails from ${ BRAND_NAME } using this address.": [
+        "U kunt nu e-mails versturen vanuit ${ BRAND_NAME } via dit adres."
+      ],
+      "You're forwarding ${ numAddressesOrSync } Gmail address to ${ MAIL_APP_NAME }.": [
+        "U stuurt ${ numAddressesOrSync } Gmail-adres door naar ${ MAIL_APP_NAME }.",
+        "U stuurt ${ numAddressesOrSync } Gmail-adressen door naar ${ MAIL_APP_NAME }."
+      ],
+      "You're forwarding emails from ${ forwardingCount } Gmail address. By connecting it, you'll be able to both receive and reply in ${ MAIL_APP_NAME }": [
+        "U stuurt e-mails door vanaf ${ forwardingCount } Gmail-adres. Door dit adres te koppelen, kunt u zowel e-mails ontvangen als beantwoorden in ${ MAIL_APP_NAME }.",
+        "U stuurt e-mails door vanaf ${ forwardingCount } Gmail-adressen. Door deze adressen te koppelen, kunt u zowel e-mails ontvangen als beantwoorden in ${ MAIL_APP_NAME }."
+      ],
+      "You've connected ${ MAX_SYNC_PAID_USER } Gmail address. To add another, first disable one of your connected accounts.": [
+        "U hebt ${ MAX_SYNC_PAID_USER } Gmail-adres gekoppeld. Als u nog een adres wilt toevoegen, moet u eerst een van uw gekoppelde accounts ontkoppelen.",
+        "U hebt ${ MAX_SYNC_PAID_USER } Gmail-adressen gekoppeld. Als u nog een adres wilt toevoegen, moet u eerst een van uw gekoppelde accounts ontkoppelen."
+      ],
+      "You've connected one external account address to ${ MAIL_APP_NAME }.": [
+        "U hebt één extern e-mailadres gekoppeld aan ${ MAIL_APP_NAME }."
+      ],
+      "Your plan supports ${ MAX_SYNC_FREE_USER } Gmail address.": [
+        "Uw abonnement ondersteunt ${ MAX_SYNC_FREE_USER } Gmail-adres.",
+        "Uw abonnement ondersteunt ${ MAX_SYNC_FREE_USER } Gmail-adressen."
+      ],
+      "Your plan supports a total of ${ MAX_SYNC_PAID_USER } Gmail address": [
+        "Uw abonnement ondersteunt in totaal ${ MAX_SYNC_PAID_USER } Gmail-adres.",
+        "Uw abonnement ondersteunt in totaal ${ MAX_SYNC_PAID_USER } Gmail-adressen."
       ]
     },
     "description": {
@@ -5155,6 +5222,9 @@
       ],
       "Your search matched too many results. Please limit your search and try again.": [
         "Uw zoekopdracht leverde te veel resultaten op. Verfijn uw zoekopdracht en probeer het opnieuw."
+      ],
+      "Address is already added to your account": [
+        "Het adres is al aan uw account toegevoegd"
       ]
     },
     "error": {
@@ -5653,6 +5723,24 @@
     "Filter": {
       "Show": [
         "Tonen"
+      ],
+      "Filter": [
+        "Filter"
+      ],
+      "Filter and sort emails": [
+        "Filter en sorteer e-mails"
+      ],
+      "Has attachments": [
+        "Heeft bijlagen"
+      ],
+      "Read": [
+        "Gelezen"
+      ],
+      "Reset": [
+        "Reset"
+      ],
+      "Unread": [
+        "Ongelezen"
       ]
     },
     "Filter Actions": {
@@ -7469,8 +7557,7 @@
         "Initialiseren..."
       ],
       "Insert image": [
-        "Afbeelding toevoegen",
-        "Afbeeldingen toevoegen"
+        "Afbeelding invoegen"
       ],
       "Insert link": [
         "Koppeling invoegen"
@@ -9964,6 +10051,12 @@
       ],
       "ZIP code": [
         "Postcode"
+      ],
+      "Personal and work emails, plus important updates and notifications": [
+        "Persoonlijke en zakelijke e-mails, plus belangrijke updates en notificaties."
+      ],
+      "Select which Gmail address to connect": [
+        "Selecteer welk Gmail-adres u wilt koppelen"
       ]
     },
     "Label (begin date/advanced search)": {
@@ -11855,6 +11948,15 @@
       ],
       "Skip for now": [
         "Sla voorlopig over"
+      ],
+      "Bring your emails into ${ MAIL_APP_NAME }": [
+        "Importeer uw e-mails in ${ MAIL_APP_NAME }"
+      ],
+      "Some popular services": [
+        "Enkele populaire services"
+      ],
+      "Switch the services you use every day to your ${ BRAND_NAME } address for better security and privacy.": [
+        "Verander de diensten die u dagelijks gebruikt naar uw ${ BRAND_NAME } adres voor meer veiligheid en privacy."
       ]
     },
     "Onboarding modal": {
@@ -13499,6 +13601,9 @@
       ],
       "Smallest first": [
         "Kleinste eerst"
+      ],
+      "Sort by": [
+        "Sorteren op"
       ]
     },
     "specialoffer: Action": {
@@ -15890,6 +15995,15 @@
       ],
       "Your shorter address is now ready": [
         "Uw kortere adres is nu klaar"
+      ],
+      "Disconnected from Gmail": [
+        "Ontkoppeld van Gmail"
+      ],
+      "Send and receive Gmail using ${ MAIL_APP_NAME }": [
+        "Gmail verzenden en ontvangen in ${ MAIL_APP_NAME }"
+      ],
+      "Use Gmail securely in ${ MAIL_APP_NAME }": [
+        "Gebruik Gmail veilig in ${ MAIL_APP_NAME }"
       ]
     },
     "Today icon tooltip in mini calendar": {
@@ -16467,6 +16581,14 @@
       ],
       "Passcode:": [
         "Toegangscode:"
+      ]
+    },
+    "Easy switch": {
+      "To forward emails from up to ${ MAX_SYNC_PAID_USER } accounts, upgrade to ${ planName }.": [
+        "Om e-mails door te sturen van maximaal ${ MAX_SYNC_PAID_USER } accounts, upgrade naar ${ planName }."
+      ],
+      "You're forwarding emails from one external account to ${ MAIL_APP_NAME }.": [
+        "U stuurt e-mails door van één extern account naar ${ MAIL_APP_NAME }."
       ]
     }
   }

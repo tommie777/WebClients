@@ -323,7 +323,7 @@
         "Contraure l'editor"
       ],
       "Copy": [
-        "Copiar"
+        "Copia"
       ],
       "Copy address": [
         "Copia l'adreça"
@@ -1505,7 +1505,8 @@
         "De confiança"
       ],
       "Trust key": [
-        "Marca com a clau de confiança"
+        "Clau de confiança",
+        "Claus de confiança"
       ],
       "Trust public key": [
         "Confia en la clau pública"
@@ -7585,8 +7586,7 @@
         "S'està inicialitzant…"
       ],
       "Insert image": [
-        "Insereix una imatge",
-        "Insereix imatges"
+        "Insereix una imatge"
       ],
       "Insert link": [
         "Insereix un enllaç"
@@ -10360,7 +10360,7 @@
         "Programats"
       ],
       "Sent": [
-        "Enviats"
+        "Enviat"
       ],
       "settings": [
         "preferències"
@@ -13539,7 +13539,7 @@
         "Els més petits primer"
       ],
       "Sort by": [
-        "Ordenar per"
+        "Ordena per"
       ]
     },
     "specialoffer: Action": {
@@ -13663,7 +13663,7 @@
         "/ mes"
       ],
       "/month": [
-        "/mesos"
+        "/mes"
       ],
       "1 year": [
         "1 any"
@@ -15376,7 +15376,7 @@
         "El codi de verificació no és vàlid."
       ],
       "Keep this banner hidden?": [
-        "Voleu mantenir aquest missatge amagat?"
+        "Voleu mantenir aquest bàner ocult?"
       ],
       "Label as": [
         "Etiqueta com a"
@@ -16060,7 +16060,7 @@
     },
     "Unlimited offer": {
       "/month": [
-        "/mesos"
+        "/mes"
       ],
       "Only": [
         "Només"

@@ -1505,7 +1505,8 @@
         "Lita på"
       ],
       "Trust key": [
-        "Lita på nyckel"
+        "Lita på nyckel",
+        "Lita på nycklar"
       ],
       "Trust public key": [
         "Lita på offentlig nyckel"
@@ -5721,6 +5722,18 @@
     "Filter": {
       "Show": [
         "Visa"
+      ],
+      "Filter": [
+        "Filter"
+      ],
+      "Filter and sort emails": [
+        "Filtrera och sortera e-post"
+      ],
+      "Has attachments": [
+        "Har bilagor"
+      ],
+      "Reset": [
+        "Återställ"
       ]
     },
     "Filter Actions": {
@@ -7522,8 +7535,7 @@
         "Initierar …"
       ],
       "Insert image": [
-        "Infoga bild",
-        "Infoga bilder"
+        "Infoga bild"
       ],
       "Insert link": [
         "Infoga länk"
@@ -13506,6 +13518,9 @@
       ],
       "Smallest first": [
         "Minsta först"
+      ],
+      "Sort by": [
+        "Sortera efter"
       ]
     },
     "specialoffer: Action": {

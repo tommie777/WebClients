@@ -1510,7 +1510,10 @@
         "Dôverovať"
       ],
       "Trust key": [
-        "Dôveryhodný kľúč"
+        "Dôveryhodný kľúč",
+        "Dôveryhodné kľúče",
+        "Dôveryhodné kľúče",
+        "Dôveryhodné kľúče"
       ],
       "Trust public key": [
         "Dôverovať verejnému kľúču"
@@ -1706,6 +1709,9 @@
       ],
       "Zoom out": [
         "Oddialiť"
+      ],
+      "Connect your email": [
+        "Pripojte svoj email"
       ]
     },
     "action": {
@@ -4350,6 +4356,9 @@
       ],
       "You’ve already created 10 aliases. Get unlimited aliases and 500 GB of storage with ${ BRAND_NAME } Unlimited.": [
         "Už ste vytvorili 10 aliasov. Získajte neobmedzený počet aliasov a 500 GB úložiska s ${ BRAND_NAME } Unlimited."
+      ],
+      "Send and receive Gmail messages directly in ${ MAIL_APP_NAME }. Connect your address in ${ addressesSettingsLink }.": [
+        "Odosielajte a prijímajte Gmailové správy priamo v ${ MAIL_APP_NAME }. Pripojte svoju adresu v ${ addressesSettingsLink }."
       ]
     },
     "description": {
@@ -5850,6 +5859,27 @@
     "Filter": {
       "Show": [
         "Zobraziť"
+      ],
+      "Filter": [
+        "Filter"
+      ],
+      "Filter (${ activeState.dropdownActiveCount })": [
+        "Filtrovať (${ activeState.dropdownActiveCount })"
+      ],
+      "Filter and sort emails": [
+        "Filtrujte a trieďte emaily"
+      ],
+      "Has attachments": [
+        "Má prílohy"
+      ],
+      "Read": [
+        "Prečítané"
+      ],
+      "Reset": [
+        "Resetovať"
+      ],
+      "Unread": [
+        "Neprečítané"
       ]
     },
     "Filter Actions": {
@@ -7814,10 +7844,7 @@
         "Inicializácia…"
       ],
       "Insert image": [
-        "Vložiť obrázok",
-        "Vložiť obrázky",
-        "Vložiť obrázky",
-        "Vložiť obrázky"
+        "Vložiť obrázok"
       ],
       "Insert link": [
         "Vložiť odkaz"
@@ -10378,6 +10405,9 @@
       ],
       "ZIP code": [
         "PSČ"
+      ],
+      "Personal and work emails, plus important updates and notifications": [
+        "Osobné a pracovné emaily, ako aj dôležité aktualizácie a oznámenia"
       ]
     },
     "Label (begin date/advanced search)": {
@@ -12364,6 +12394,9 @@
       ],
       "Switch the services you use every day to your ${ BRAND_NAME } address for better security and privacy.": [
         "Pre lepšiu bezpečnosť a ochranu súkromia prejdite pri službách, ktoré používate každý deň, na adresu ${ BRAND_NAME }."
+      ],
+      "Bring your existing emails into ${ MAIL_APP_NAME } so you can manage everything from one private inbox.": [
+        "Preneste svoje existujúce emaily do aplikácie ${ MAIL_APP_NAME }, aby ste mohli všetko spravovať z jednej súkromnej schránky."
       ]
     },
     "Onboarding modal": {
@@ -13974,6 +14007,9 @@
       ],
       "Smallest first": [
         "Od najmenších"
+      ],
+      "Sort by": [
+        "Zoradiť podľa"
       ]
     },
     "specialoffer: Action": {

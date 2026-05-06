@@ -1505,7 +1505,8 @@
         "Faire confiance"
       ],
       "Trust key": [
-        "Clé de confiance"
+        "Faire confiance à cette clé",
+        "Faire confiance à ces clés"
       ],
       "Trust public key": [
         "Approuver la clé publique"
@@ -7585,8 +7586,7 @@
         "Initialisation…"
       ],
       "Insert image": [
-        "Insérer une image",
-        "Insérer des images"
+        "Insérer une image"
       ],
       "Insert link": [
         "Insérer un lien"
@@ -12209,7 +12209,7 @@
         "Aucun dossier parent"
       ],
       "Remind me later": [
-        "Me rappeler plus tard"
+        "Me le rappeler plus tard"
       ],
       "Yes, don't show again": [
         "Oui, ne plus afficher"
@@ -15472,7 +15472,7 @@
         "Le code de vérification n'est pas valide."
       ],
       "Keep this banner hidden?": [
-        "Masquer cette bannière ?"
+        "Garder cette bannière cachée ?"
       ],
       "Label as": [
         "Labelliser"

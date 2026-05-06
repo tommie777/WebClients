@@ -1655,6 +1655,15 @@
       ],
       "Zoom out": [
         "縮小"
+      ],
+      "Connect your email": [
+        "連接您的電子郵件"
+      ],
+      "Or remove forwarding address": [
+        "或移除轉寄位址"
+      ],
+      "Use ${ VPN_SHORT_APP_NAME } for data privacy": [
+        "使用 ${ VPN_SHORT_APP_NAME } 為了資料隱私"
       ]
     },
     "action": {
@@ -2557,6 +2566,9 @@
       ],
       "Total for ${ n } month": [
         " ${ n } 個月總計"
+      ],
+      "Subtotal": [
+        "小計"
       ]
     },
     "Collapsible tooltip": {
@@ -4116,6 +4128,21 @@
       ],
       "You’ve already created 10 aliases. Get unlimited aliases and 500 GB of storage with ${ BRAND_NAME } Unlimited.": [
         "您已經創建10個別名。${ BRAND_NAME }無限版可獲得無限別名和500GB的儲存容量。"
+      ],
+      "Emails sent to ${ connectedAddressText } will now show up in ${ MAIL_APP_NAME }.": [
+        "電子郵件傳送至 ${ connectedAddressText } 將顯示於 ${ MAIL_APP_NAME }。"
+      ],
+      "Ensure you can still access your account and data even if you lose your ${ BRAND_NAME } password.": [
+        "確保您仍可存取至您的帳號及資料就算您忘記您的 ${ BRAND_NAME } 密碼。"
+      ],
+      "To continue receiving and sending Gmail messages in ${ BRAND_NAME }, please reconnect your account.": [
+        "若要於 ${ BRAND_NAME } 要持續接收和傳送 Gmail 的訊息，請重新連接至您的帳號。"
+      ],
+      "Upgrade to ${ planName } to connect up to ${ MAX_SYNC_PAID_USER } accounts": [
+        "升級至 ${ planName } 已連線到至多 ${ MAX_SYNC_PAID_USER } 個帳號"
+      ],
+      "You can now send emails from ${ BRAND_NAME } using this address.": [
+        "您可透過 ${ BRAND_NAME } 用此位址傳送電子郵件。"
       ]
     },
     "description": {
@@ -5020,6 +5047,12 @@
       ],
       "Your search matched too many results. Please limit your search and try again.": [
         "搜尋結果過多。請縮小您的搜尋範圍並重新試試。"
+      ],
+      "Address could not be added.": [
+        "位址無法被添加。"
+      ],
+      "Address is already added to your account": [
+        "位址已添加至您的帳號"
       ]
     },
     "error": {
@@ -5496,6 +5529,24 @@
     "Filter": {
       "Show": [
         "顯示"
+      ],
+      "Filter": [
+        "過濾"
+      ],
+      "Filter and sort emails": [
+        "過濾器和排序電子郵件"
+      ],
+      "Has attachments": [
+        "有附件"
+      ],
+      "Read": [
+        "已讀"
+      ],
+      "Reset": [
+        "重置"
+      ],
+      "Unread": [
+        "未讀"
       ]
     },
     "Filter Actions": {
@@ -5773,6 +5824,9 @@
       ],
       "You've unlocked 1 GB": [
         "您解鎖1GB"
+      ],
+      "Review import options": [
+        "瀏覽匯入選項"
       ]
     },
     "Gmail forwarding": {
@@ -7172,7 +7226,7 @@
         "正在初始化 ..."
       ],
       "Insert image": [
-        "插入影像"
+        "插入圖像"
       ],
       "Insert link": [
         "插入連結"
@@ -8547,6 +8601,27 @@
       ],
       "You’re just a few clicks away from a clutter-free inbox": [
         "輕點幾下滑鼠，即可擁有整潔的收件匣"
+      ],
+      "Categories work just like spam filters. ${ MAIL_APP_NAME } never reads your emails or shares your data.": [
+        "類別有如垃圾郵件篩選器。 ${ MAIL_APP_NAME } 永不已讀您的電子郵件或共享您的資料。"
+      ],
+      "Choose your service to connect with": [
+        "選擇您的服務以連線"
+      ],
+      "Copy to clipboard": [
+        "複製到剪貼簿"
+      ],
+      "Each code can only be used once": [
+        "每個代碼都只能使用一次"
+      ],
+      "On public WiFi networks": [
+        "於公用 WiFi 網路上"
+      ],
+      "Scan the QR code with your mobile device": [
+        "透過行動裝置掃描此 QR Code"
+      ],
+      "Tracking": [
+        "追蹤"
       ]
     },
     "info": {
@@ -9577,6 +9652,15 @@
       ],
       "ZIP code": [
         "郵遞區號"
+      ],
+      "Additional comments": [
+        "附加備註"
+      ],
+      "Choose what to do instead": [
+        "選擇替代動作"
+      ],
+      "Select which Gmail address to connect": [
+        "選取 Gmail 位址以連線"
       ]
     },
     "Label (begin date/advanced search)": {
@@ -9915,6 +9999,9 @@
       ],
       "You need to reactivate your keys to see the updated invitation": [
         "您需要先重新啟用您的金鑰，才可查看已更新的邀請"
+      ],
+      "Enforcing 2FA for organizations": [
+        "強制貴組織雙重驗證"
       ]
     },
     "Link to calendar event": {
@@ -10032,6 +10119,9 @@
       ],
       "${ seats } ${ MEET_APP_NAME } seat": [
         "${ seats } ${ MEET_APP_NAME } 席位"
+      ],
+      "${ MEET_APP_NAME } license": [
+        "${ MEET_APP_NAME } 授權"
       ]
     },
     "meet_2025: Feature": {
@@ -11383,6 +11473,9 @@
       ],
       "Some popular services": [
         "熱門的服務"
+      ],
+      "Choose a provider": [
+        "選擇服務商"
       ]
     },
     "Onboarding modal": {
@@ -11575,6 +11668,9 @@
       ],
       "Your free trial has started": [
         "您的免費試用已開始"
+      ],
+      "Your full ${ planTitle } subscription starts on ${ boldEndDate }.": [
+        "您全部 ${ planTitle } 訂閱開始於 ${ boldEndDate }。"
       ]
     },
     "Option": {
@@ -11839,6 +11935,12 @@
       ],
       "Your subscription currently has an existing discount. Moving to this new promotion means that the existing discount will no longer be applied.": [
         "您的訂閱已套用現有折扣。若轉換至新的促銷方案，現有折扣將不再套用。"
+      ],
+      "Edit billing address": [
+        "編輯帳單地址"
+      ],
+      "Including ${ rate }% taxes": [
+        "包含 ${ rate }% 稅金"
       ]
     },
     "Payments.Error": {
@@ -12150,6 +12252,12 @@
       ],
       "ZIP code": [
         "郵遞區號"
+      ],
+      "Enter a name": [
+        "輸入名稱"
+      ],
+      "Select a provider": [
+        "選擇一個供應商"
       ]
     },
     "Placeholder for contact group name": {
@@ -12173,6 +12281,9 @@
       ],
       "Upgrade to ${ upsellPlanTitle }": [
         "升級至${ upsellPlanTitle }"
+      ],
+      "Stay on ${ currentPlanTitle }": [
+        "保持 ${ currentPlanTitle } 方案"
       ]
     },
     "Progress bar description": {
@@ -12250,6 +12361,9 @@
       ],
       "Yahoo": [
         "Yahoo"
+      ],
+      "Google Workspace": [
+        "Google Workspace"
       ]
     },
     "q1campaign: Action": {
@@ -12883,6 +12997,9 @@
       ],
       "Smallest first": [
         "從最小排序"
+      ],
+      "Sort by": [
+        "排列方式"
       ]
     },
     "specialoffer: Action": {
@@ -13073,6 +13190,9 @@
       ],
       "Upgrade and save more with 2 years of ${ planName }": [
         "使用兩年的 ${ planName } 升級並節省更多"
+      ],
+      "Get 500 GB to securely store all your files and photos": [
+        "取得 500 GB 以安全地儲存您的檔案和照片"
       ]
     },
     "specialoffer: Tooltip": {
@@ -13575,6 +13695,9 @@
       ],
       "Your own short @pm.me email alias": [
         "您自己短@pm.me電子郵件別名"
+      ],
+      "${ CALENDAR_APP_NAME }, ${ DRIVE_SHORT_APP_NAME }, ${ PASS_SHORT_APP_NAME }, ${ VPN_SHORT_APP_NAME }, ${ MEET_SHORT_APP_NAME }, and ${ LUMO_APP_NAME } with premium features": [
+        "${ CALENDAR_APP_NAME } 、 ${ DRIVE_SHORT_APP_NAME } 、${ PASS_SHORT_APP_NAME } 、 ${ VPN_SHORT_APP_NAME } 、 ${ MEET_SHORT_APP_NAME } 、和 ${ LUMO_APP_NAME } 與頂級質子版功能"
       ]
     },
     "subscription reminder": {
@@ -15144,6 +15267,9 @@
       ],
       "Your shorter address is now ready": [
         "您的短地址已完成"
+      ],
+      "Bring your Gmail into ${ MAIL_APP_NAME }": [
+        "帶入您的 Gmail 至 ${ MAIL_APP_NAME }"
       ]
     },
     "Today icon tooltip in mini calendar": {
