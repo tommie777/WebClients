@@ -2828,6 +2828,9 @@
       ],
       "Åland Islands": [
         "奧蘭群島"
+      ],
+      "North Macedonia": [
+        "北馬其頓"
       ]
     },
     "Country select label": {
@@ -3921,6 +3924,9 @@
       ],
       "Address could not be added.": [
         "位址無法被添加。"
+      ],
+      "Company name or personal name is required": [
+        "公司名稱或個人名稱是需要的"
       ]
     },
     "error": {
@@ -9152,6 +9158,9 @@
       ],
       "Renewal price is dependent on the billing region and EIN.": [
         "續訂價格取決於計費區域和 EIN。"
+      ],
+      "Renewal price is dependent on the billing region and VAT number.": [
+        "續訂價格取決於計費區域和 VAT 號碼。"
       ]
     },
     "Payments.Saved payment method details": {
@@ -10865,6 +10874,9 @@
       ],
       "You have successfully unsubscribed": [
         "您已成功取消訂購"
+      ],
+      "Booking page created and link copied to clipboard": [
+        "已創建預定網站和已複製連結至剪貼簿"
       ]
     },
     "Suffix": {
