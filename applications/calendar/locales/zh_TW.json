@@ -997,6 +997,15 @@
       ],
       "Use ${ VPN_SHORT_APP_NAME } for data privacy": [
         "使用 ${ VPN_SHORT_APP_NAME } 為了資料隱私"
+      ],
+      "Expand navigation bar to see calendars": [
+        "展開導航以查看行事曆"
+      ],
+      "Go back": [
+        "倒退"
+      ],
+      "More options for accounts": [
+        "更多帳號選項"
       ]
     },
     "action": {
@@ -1088,6 +1097,12 @@
       ],
       "Writing assistant seats": [
         "撰寫幫手就位"
+      ],
+      "${ ips } dedicated VPN server": [
+        "${ ips } 專用伺服器"
+      ],
+      "${ seats } ${ LUMO_APP_NAME } AI license": [
+        "${ seats } ${ LUMO_APP_NAME } AI 授權"
       ]
     },
     "Alarm notification": {
@@ -1343,6 +1358,9 @@
       ],
       "Unlimited daily chats": [
         "無限每日聊天"
+      ],
+      "Individual accounts for 6 users": [
+        "給 6 位使用者的個人帳戶"
       ]
     },
     "BF2025: Tooltip": {
@@ -1831,6 +1849,9 @@
       ],
       "Private video calls for the conversations that matter.": [
         "用於重要交談的私密視訊。"
+      ],
+      "Advanced account and network security in one plan": [
+        "進階帳號和網路安全於單一方案"
       ]
     },
     "colon": {
@@ -3094,6 +3115,12 @@
       ],
       "You’ll get a secure email with the details shortly.": [
         "您即將取得安全電子郵件附帶詳細資料。"
+      ],
+      "Help your team securely store passwords to sensitive business and client information.": [
+        "協助團隊安全地以密碼儲存商務機密和客戶資訊。"
+      ],
+      "This may happen if permissions were removed or your password changed.": [
+        "此可能發生於權限被移除或您的密碼被變更。"
       ]
     },
     "description": {
@@ -4380,6 +4407,9 @@
     "fido2: Info": {
       "Security key": [
         "安全金鑰"
+      ],
+      "Insert a security key linked to your ${ BRAND_NAME } Account.": [
+        "插入連結到您 ${ BRAND_NAME } 帳號的安全金鑰。"
       ]
     },
     "fido2: Label": {
@@ -6250,6 +6280,21 @@
       ],
       "Tracking": [
         "追蹤"
+      ],
+      "${ planName } expires in ${ daysLeft } day.": [
+        "${ planName } 過其於 ${ daysLeft } 天。"
+      ],
+      "${ VPN_SHORT_APP_NAME } hides your traffic. ${ PASS_SHORT_APP_NAME } hides your identity\n— unlimited **hide-my-email aliases** and **dark-web alerts** if your data is ever leaked.": [
+        "${ VPN_SHORT_APP_NAME } 隱藏您的流量。 ${ PASS_SHORT_APP_NAME } 隱藏您的身份 - 無限 ** Hide-my-email 別名 ** 和 ** 暗網警告 ** 若您的資料外洩。"
+      ],
+      "For just ${ bundlePlanPriceInline }": [
+        "只要 ${ bundlePlanPriceInline }"
+      ],
+      "RECOMMENDED": [
+        "推薦"
+      ],
+      "This booking page cannot be edited, the associated calendar is disabled": [
+        "此預定頁面無法被編輯，與它關聯的行事曆已被停用"
       ]
     },
     "info": {
@@ -6965,11 +7010,20 @@
       ],
       "Additional comments": [
         "附加備註"
+      ],
+      "Continue cancelling": [
+        "持續取消"
       ]
     },
     "label": {
       "How long should an appointment last?": [
         "預約應持續多久？"
+      ],
+      "Date of the booking range": [
+        "移除此預定範圍"
+      ],
+      "Start time of the booking range": [
+        "預定範圍的開始時間"
       ]
     },
     "Label for contact group color": {
@@ -7298,6 +7352,9 @@
     "meet_2025: Info": {
       "${ seats } seat included": [
         "包含 ${ seats } 座席"
+      ],
+      "You can have up to ${ TRIAL_MAX_MEET_SEATS } ${ MEET_SHORT_APP_NAME } seats during the trial period.": [
+        "您可在試用期內盡情享有多 ${ TRIAL_MAX_MEET_SEATS } ${ MEET_SHORT_APP_NAME } 席位。"
       ]
     },
     "Message": {
@@ -8701,6 +8758,9 @@
       ],
       "Ultrafast VPN servers in 110+ countries": [
         "在110 多個國家提供極速 VPN 伺服器"
+      ],
+      "Collaborate with non-${ BRAND_NAME } users": [
+        "與非 ${ BRAND_NAME } 使用者合作"
       ]
     },
     "Onboarding": {
@@ -9376,6 +9436,9 @@
       ],
       "Select a provider": [
         "選擇一個供應商"
+      ],
+      "Enter a short description or additional info": [
+        "輸入一個簡短描述或額外資訊"
       ]
     },
     "Placeholder for contact group name": {
@@ -9391,6 +9454,9 @@
     "Plan description": {
       "All premium features from ${ BRAND_NAME } ${ MAIL_SHORT_APP_NAME }, ${ PASS_SHORT_APP_NAME }, ${ VPN_SHORT_APP_NAME }, ${ DRIVE_SHORT_APP_NAME }, and ${ CALENDAR_SHORT_APP_NAME }": [
         "您的頂級質子版服務源自於 ${ BRAND_NAME } 、 ${ MAIL_SHORT_APP_NAME } 、 ${ PASS_SHORT_APP_NAME } 、 ${ VPN_SHORT_APP_NAME } 、 ${ DRIVE_SHORT_APP_NAME } 和 ${ CALENDAR_SHORT_APP_NAME }"
+      ],
+      "All premium features from ${ BRAND_NAME } ${ MAIL_SHORT_APP_NAME }, ${ CALENDAR_SHORT_APP_NAME }, ${ DRIVE_SHORT_APP_NAME }, ${ VPN_SHORT_APP_NAME }, and ${ PASS_SHORT_APP_NAME }.": [
+        "您的頂級質子版服務源自於 ${ BRAND_NAME } 、 ${ MAIL_SHORT_APP_NAME } 、 ${ CALENDAR_SHORT_APP_NAME } 、 ${ DRIVE_SHORT_APP_NAME } 、 ${ VPN_SHORT_APP_NAME } 和 ${ PASS_SHORT_APP_NAME }。"
       ]
     },
     "Plans": {
@@ -9407,6 +9473,9 @@
       ],
       "Stay on ${ currentPlanTitle }": [
         "保持 ${ currentPlanTitle } 方案"
+      ],
+      "As a **${ currentPlanTitle }** subscriber, you can unlock **${ unlockPlanTitle }** and more ${ BRAND_NAME } services by upgrading to **${ upsellPlanTitle }**.": [
+        "身為一位 **${ currentPlanTitle }** 訂閱者，您可透過升級至 **${ upsellPlanTitle }** 方案以解鎖 **${ unlockPlanTitle }** 和更多 ${ BRAND_NAME } 服務。"
       ]
     },
     "Progress bar description": {
@@ -11767,6 +11836,12 @@
       ],
       "Your shorter address is now ready": [
         "您的短地址已完成"
+      ],
+      "Upgrade your storage for ${ formattedPrice } with ${ planName }": [
+        "以 ${ planName } 的 ${ formattedPrice } 方案升級您的儲存空間"
+      ],
+      "Use ${ VPN_SHORT_APP_NAME } for data privacy": [
+        "使用 ${ VPN_SHORT_APP_NAME } 為了資料隱私"
       ]
     },
     "Title (number of minutes/hours/days/weeks)": {
@@ -12285,6 +12360,11 @@
       ],
       "Passcode:": [
         "數字密碼:"
+      ]
+    },
+    "fido2: Error": {
+      "Something went wrong authenticating with your security key. Please try again.": [
+        "使用您的安全金鑰進行身份驗證時出現問題。請再試一次。"
       ]
     }
   }
