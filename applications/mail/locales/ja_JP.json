@@ -7253,7 +7253,7 @@
         "お客様ご自身のアカウントデータは引き続き表示できますが、すべてのユーザーアカウントがお客様の組織から削除されます。"
       ],
       "Insert image": [
-        "画像の挿入"
+        "画像を挿入"
       ],
       "${ LUMO_SHORT_APP_NAME } panel": [
         "${ LUMO_SHORT_APP_NAME } パネル"
@@ -16648,6 +16648,20 @@
       ],
       "Sun, ${ formatTime }": [
         "${ formatTime }日曜日"
+      ]
+    },
+    "Title header for keys table": {
+      "Actions": [
+        "操作"
+      ],
+      "Fingerprint": [
+        "指紋"
+      ],
+      "Status": [
+        "状態"
+      ],
+      "Type": [
+        "種類"
       ]
     }
   }

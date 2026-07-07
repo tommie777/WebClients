@@ -1094,8 +1094,7 @@
         "Zoom uit"
       ],
       "Trust key": [
-        "Sleutel vertrouwen",
-        "Sleutels vertrouwen"
+        "Vertrouwde sleutel"
       ],
       "A to Z": [
         "A tot Z"
@@ -7664,7 +7663,8 @@
         "U kunt nog steeds uw eigen accountgegevens bekijken, maar alle gebruikersaccounts worden verwijderd uit uw organisatie."
       ],
       "Insert image": [
-        "Afbeelding invoegen"
+        "Afbeelding toevoegen",
+        "Afbeeldingen toevoegen"
       ],
       "${ boldBulkDelete }, archive, or move old emails to a folder.": [
         "${ boldBulkDelete }, oude e-mails archiveren of naar een map verplaatsen."
@@ -17102,6 +17102,20 @@
       ],
       "Sun, ${ formatTime }": [
         "Zon., ${ formatTime }"
+      ]
+    },
+    "Title header for keys table": {
+      "Actions": [
+        "Acties"
+      ],
+      "Fingerprint": [
+        "Vingerafdruk"
+      ],
+      "Status": [
+        "Status"
+      ],
+      "Type": [
+        "Soort"
       ]
     }
   }

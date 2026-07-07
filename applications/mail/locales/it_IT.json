@@ -1659,8 +1659,7 @@
         "La protezione del tracker ha impedito il caricamento di alcune immagini. Caricale se ti fidi del mittente."
       ],
       "Trust key": [
-        "chiave attendibile",
-        "chiavi attendibili"
+        "Affida chiave"
       ],
       "Trust public key": [
         "Chiave pubblica attendibile"
@@ -5047,7 +5046,7 @@
         "Destinatari duplicati rimossi: ${ recipents }"
       ],
       "Reverse charge scheme is not supported for this plan": [
-        "Il regime di reverse charge non è previsto per questo piano"
+        "Il regime di inversione contabile non è previsto per questo piano"
       ],
       "Sending attachments is restricted until you meet your plan limits or upgrade.": [
         "L'invio di allegati è limitato fino al raggiungimento dei limiti del piano o fino a quando effettuerai l'upgrade."
@@ -7600,7 +7599,8 @@
         "Potrai ancora visualizzare i dati del tuo account, ma tutti gli account utente verranno rimossi dalla tua organizzazione."
       ],
       "Insert image": [
-        "Inserisci immagine"
+        "Inserisci immagine",
+        "Inserisci immagini"
       ],
       "${ boldBulkDelete }, archive, or move old emails to a folder.": [
         "${ boldBulkDelete }, archivia o sposta le vecchie email in una cartella."
@@ -7673,7 +7673,7 @@
         "${ LUMO_SHORT_APP_NAME } ti aiuta a creare email migliori in modo rapido e senza sforzo."
       ],
       "${ LUMO_SHORT_APP_NAME } panel": [
-        "Pannello ${ LUMO_SHORT_APP_NAME }"
+        "Pannello di ${ LUMO_SHORT_APP_NAME }"
       ],
       "${ MAIL_APP_NAME } can protect your business as well.": [
         "${ MAIL_APP_NAME } può proteggere anche la tua azienda."
@@ -8718,7 +8718,7 @@
         "Hai scritto “${ attachmentsFoundKeyword }”, ma nessun allegato è stato aggiunto. Vuoi comunque inviare il tuo messaggio?"
       ],
       "Your account is currently configured to apply the reverse charge scheme. This is not supported for the selected plan. To proceed, either remove the VAT number from the billing address or select a different plan.": [
-        "Il tuo account è attualmente configurato per applicare il regime di reverse charge. Questo non è previsto per il piano selezionato. Per procedere, rimuovi il numero di partita IVA dall'indirizzo di fatturazione o seleziona un piano diverso."
+        "Il tuo account è attualmente configurato per applicare il regime di inversione contabile. Questo non è previsto per il piano selezionato. Per procedere, rimuovi il numero di partita IVA dall'indirizzo di fatturazione o seleziona un piano diverso."
       ],
       "Your browser doesn't support the writing assistant. Try running it on servers.": [
         "Il tuo browser non supporta l'esecuzione locale dell'assistente alla scrittura. Prova a eseguirlo sui server."
@@ -16964,6 +16964,20 @@
       ],
       "Sun, ${ formatTime }": [
         "Dom, ${ formatTime }"
+      ]
+    },
+    "Title header for keys table": {
+      "Actions": [
+        "Azioni"
+      ],
+      "Fingerprint": [
+        "Impronta digitale"
+      ],
+      "Status": [
+        "Stato"
+      ],
+      "Type": [
+        "Tipo"
       ]
     }
   }

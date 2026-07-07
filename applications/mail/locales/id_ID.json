@@ -16524,6 +16524,20 @@
       "Sun, ${ formatTime }": [
         "Min, ${ formatTime }"
       ]
+    },
+    "Title header for keys table": {
+      "Actions": [
+        "Tindakan"
+      ],
+      "Fingerprint": [
+        "Sidik jari"
+      ],
+      "Status": [
+        "Status"
+      ],
+      "Type": [
+        "Tipe"
+      ]
     }
   }
 }

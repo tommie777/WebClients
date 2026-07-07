@@ -1668,8 +1668,7 @@
         "A proteção contra rastreadores impediu o carregamento de algumas imagens. Carregue-as se você confiar no remetente."
       ],
       "Trust key": [
-        "Chave de confiança",
-        "Chaves de confiança"
+        "Chave de confiança"
       ],
       "Trust public key": [
         "Confiar na chave pública"
@@ -7454,7 +7453,8 @@
         "Você ainda poderá visualizar os dados da sua própria conta, mas todas as contas de usuário serão removidas da sua organização."
       ],
       "Insert image": [
-        "Inserir imagem"
+        "Inserir imagem",
+        "Inserir imagens"
       ],
       "To help you remember your password, we'll ask you to enter it periodically. We ask you less over time.": [
         "Para ajudar você a lembrar sua senha, pediremos que você a insira periodicamente. Com o passar do tempo, iremos solicitar isso com menos frequência."
@@ -9771,6 +9771,9 @@
       ],
       "Updates - Automated confirmations, alerts, and account updates": [
         "Atualizações — Confirmações automáticas, alertas e atualizações de conta"
+      ],
+      "Import your emails": [
+        "Importe seus e-mails"
       ]
     },
     "Label (begin date/advanced search)": {
@@ -15557,6 +15560,9 @@
       ],
       "This ensures no one can see location, device, and other information that could be used to identify or track you.": [
         "Isso garante que ninguém pode ver a localização, dispositivo, e outra informação que possa ser usada para identificar ou rastrear você."
+      ],
+      "Version 6 OpenPGP key": [
+        "Chave OpenPGP versão 6"
       ]
     },
     "tooltip": {
@@ -17144,6 +17150,26 @@
       ],
       "Sign in to the service": [
         "Inicie sessão no serviço"
+      ]
+    },
+    "Title header for keys table": {
+      "Actions": [
+        "Ações"
+      ],
+      "Created": [
+        "Criada"
+      ],
+      "Expires": [
+        "Expira"
+      ],
+      "Fingerprint": [
+        "Impressão digital"
+      ],
+      "Status": [
+        "Status"
+      ],
+      "Type": [
+        "Tipo"
       ]
     }
   }

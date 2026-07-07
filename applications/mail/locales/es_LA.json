@@ -1109,8 +1109,7 @@
         "Mostrar ${ title }"
       ],
       "Trust key": [
-        "Confiar clave",
-        "Confiar claves"
+        "Confiar clave"
       ],
       "A to Z": [
         "A-Z"
@@ -7487,7 +7486,8 @@
         "Podrá seguir viendo los datos de su propia cuenta, pero todas las cuentas de usuario serán eliminadas de su organización."
       ],
       "Insert image": [
-        "Insertar imagen"
+        "Insertar imagen",
+        "Insertar imágenes"
       ],
       "${ contactGroupName } (${ numberOfSelectedContacts }/${ numberOfContactsInGroup } member)": [
         "${ contactGroupName } (${ numberOfSelectedContacts }/${ numberOfContactsInGroup } miembro)",
@@ -15072,7 +15072,7 @@
         "Eliminar ${ count } mensajes"
       ],
       "Keep this banner hidden?": [
-        "¿Mantener oculta esta barra?"
+        "¿Mantener este banner oculto?"
       ],
       "Mailing list": [
         "Lista de correo",
@@ -15539,6 +15539,9 @@
       ],
       "This ensures no one can see location, device, and other information that could be used to identify or track you.": [
         "Esto garantiza que nadie pueda ver su ubicación, dispositivo y otra información que pueda usarse para identificarle o rastrearle."
+      ],
+      "Version 6 OpenPGP key": [
+        "Clave OpenPGP versión 6"
       ]
     },
     "tooltip": {
@@ -17131,6 +17134,31 @@
       ],
       "Sun, ${ formatTime }": [
         "Dom. a las ${ formatTime }"
+      ]
+    },
+    "Title header for keys table": {
+      "Actions": [
+        "Acciones"
+      ],
+      "Created": [
+        "Creada"
+      ],
+      "Expires": [
+        "Expira"
+      ],
+      "Fingerprint": [
+        "Huella digital"
+      ],
+      "Status": [
+        "Estado"
+      ],
+      "Type": [
+        "Tipo"
+      ]
+    },
+    "user_modal": {
+      "You'll be able to assign roles once the user has accepted the invitation.": [
+        "Podrá asignar roles una vez que el usuario haya aceptado la invitación."
       ]
     }
   }

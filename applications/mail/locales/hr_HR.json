@@ -1366,6 +1366,9 @@
       ],
       "Your email writing assistant": [
         "Vaš asistent za pisanje e-pošte"
+      ],
+      "Trust key": [
+        "Ključ povjerenja"
       ]
     },
     "action": {
@@ -5002,7 +5005,9 @@
         "Vaš broj telefona koristit će se samo za ovu jednokratnu provjeru."
       ],
       "Insert image": [
-        "Umetni sliku"
+        "Umetni sliku",
+        "Umetni slike",
+        "Umetni slike"
       ],
       "${ contactGroupName } (${ numberOfSelectedContacts }/${ numberOfContactsInGroup } member)": [
         "${ contactGroupName } (${ numberOfSelectedContacts }/${ numberOfContactsInGroup } član)",

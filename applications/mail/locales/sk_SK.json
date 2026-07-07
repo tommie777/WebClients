@@ -1102,10 +1102,7 @@
         "Oddialiť"
       ],
       "Trust key": [
-        "Dôveryhodný kľúč",
-        "Dôveryhodné kľúče",
-        "Dôveryhodné kľúče",
-        "Dôveryhodné kľúče"
+        "Dôveryhodný kľúč"
       ],
       "A to Z": [
         "od A po Z"
@@ -7911,7 +7908,10 @@
         "Stále si budete môcť prezerať svoje vlastné údaje, ale všetky používateľské účty budú z vašej organizácie odstránené."
       ],
       "Insert image": [
-        "Vložiť obrázok"
+        "Vložiť obrázok",
+        "Vložiť obrázky",
+        "Vložiť obrázky",
+        "Vložiť obrázky"
       ],
       "${ boldBulkDelete }, archive, or move old emails to a folder.": [
         "${ boldBulkDelete }, archivácia alebo presun starých emailov do priečinka."
@@ -16193,6 +16193,9 @@
       ],
       "This ensures no one can see location, device, and other information that could be used to identify or track you.": [
         "Týmto sa zabezpečí, že nikto neuvidí údaje o polohe, zariadení a ďalšie informácie, ktoré by sa dali použiť na vašu identifikáciu alebo sledovanie."
+      ],
+      "Version 6 OpenPGP key": [
+        "Kľúč OpenPGP verzie 6"
       ]
     },
     "tooltip": {
@@ -17749,6 +17752,31 @@
       ],
       "Sun, ${ formatTime }": [
         "Ne, ${ formatTime }"
+      ]
+    },
+    "Title header for keys table": {
+      "Actions": [
+        "Akcie"
+      ],
+      "Created": [
+        "Vytvorené"
+      ],
+      "Expires": [
+        "Vyprší"
+      ],
+      "Fingerprint": [
+        "Odtlačok prsta"
+      ],
+      "Status": [
+        "Stav"
+      ],
+      "Type": [
+        "Typ"
+      ]
+    },
+    "user_modal": {
+      "You'll be able to assign roles once the user has accepted the invitation.": [
+        "Akonáhle používateľ prijme pozvánku, budete môcť priradiť pozície."
       ]
     }
   }

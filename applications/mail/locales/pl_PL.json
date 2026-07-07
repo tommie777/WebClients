@@ -1727,6 +1727,9 @@
       ],
       "Your email writing assistant": [
         "Twój asystent pisania"
+      ],
+      "Trust key": [
+        "Zaufaj kluczowi"
       ]
     },
     "action": {
@@ -7315,7 +7318,10 @@
         "Nadal będziesz mógł przeglądać dane konta, ale wszystkie konta użytkowników zostaną usunięte z organizacji."
       ],
       "Insert image": [
-        "Wstaw obraz"
+        "Wstaw obraz",
+        "Wstaw obrazy",
+        "Wstaw obrazy",
+        "Wstaw obrazy"
       ],
       "${ boldBulkDelete }, archive, or move old emails to a folder.": [
         "${ boldBulkDelete }, archiwizowanie lub przenoszenie starych wiadomości do folderu."
@@ -17588,6 +17594,17 @@
       ],
       "Sun, ${ formatTime }": [
         "nie., ${ formatTime }"
+      ]
+    },
+    "Title header for keys table": {
+      "Fingerprint": [
+        "Odcisk klucza"
+      ],
+      "Status": [
+        "Status"
+      ],
+      "Type": [
+        "Rodzaj"
       ]
     }
   }

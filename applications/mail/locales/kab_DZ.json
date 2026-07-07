@@ -1233,6 +1233,9 @@
       ],
       "Why not?": [
         "Acimi ala?"
+      ],
+      "Trust key": [
+        "Tasarut yettwamanen"
       ]
     },
     "action": {
@@ -4475,7 +4478,8 @@
         "Uṭṭun-ik n tiliɣṛi ad yettwaseqdec kan tikkelt deg usenqed-agi."
       ],
       "Insert image": [
-        "Ger tugna"
+        "Ger tugna",
+        "Ger tugniwn"
       ],
       "${ contactGroupName } (${ numberOfSelectedContacts }/${ numberOfContactsInGroup } member)": [
         "${ contactGroupName } (${ numberOfSelectedContacts }/${ numberOfContactsInGroup } uɛeggal)",

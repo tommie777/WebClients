@@ -7183,7 +7183,7 @@
         "您仍可瀏覽您的帳號資料，但所有使用者帳號將被從貴組織移除。"
       ],
       "Insert image": [
-        "插入圖像"
+        "插入影像"
       ],
       "${ boldBulkDelete }, archive, or move old emails to a folder.": [
         "${ boldBulkDelete } 、封存、或移動舊的電子郵件至資料夾。"
@@ -16457,6 +16457,14 @@
       ],
       "Sun, ${ formatTime }": [
         "星期日, ${ formatTime }"
+      ]
+    },
+    "Title header for keys table": {
+      "Created": [
+        "已創建"
+      ],
+      "Expires": [
+        "到期日"
       ]
     }
   }

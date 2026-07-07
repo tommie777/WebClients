@@ -1669,10 +1669,7 @@
         "Ochrana před sledováním zabránila načtení některých obrázků. Pokud odesílateli důvěřujete, načtěte je."
       ],
       "Trust key": [
-        "Důvěřovat klíči",
-        "Důvěřovat klíčům",
-        "Důvěřovat klíčům",
-        "Důvěřovat klíčům"
+        "Důvěřovat klíči"
       ],
       "Trust public key": [
         "Důvěřovat veřejnému klíči"
@@ -3965,7 +3962,7 @@
         "Pro neomezený přístup k asistentovi psaní a dalším možnostem přejděte na ${ BRAND_NAME } Duo."
       ],
       "For unlimited access to the writing assistant and more, upgrade to ${ LUMO_SHORT_APP_NAME }.": [
-        "Pro neomezený přístup k asistentovi psaní a dalším možnostem upgradujte na ${ LUMO_SHORT_APP_NAME }."
+        "Pro neomezený přístup k asistentovi psaní a dalším možnostem přejděte na ${ LUMO_SHORT_APP_NAME }."
       ],
       "If a message appears in the wrong category, simply move it to the right one. Right-click a message to choose a new category, or drag and drop it where it belongs.": [
         "Pokud se zpráva zobrazí ve špatné kategorii, jednoduše ji přesuňte do té správné. Klikněte pravým tlačítkem na zprávu a zvolte novou kategorii, nebo ji táhněte a pusťte tam, kam patří."
@@ -6755,7 +6752,7 @@
         "V dalším kroku budete moci odeslat vklad pomocí bitcoinové adresy."
       ],
       "Included": [
-        "Včetně"
+        "Zahrnuto"
       ],
       "Inherited from parent folder": [
         "Převzato z nadřazené složky"
@@ -7268,13 +7265,13 @@
         "Nepodporovaný soubor"
       ],
       "Upgrade anytime to bring over the rest": [
-        "Kdykoli upgradujte, abyste přenesli i zbytek"
+        "Kdykoli navyšte účet, abyste přenesli i zbytek"
       ],
       "Upgrade now to get premium features, products and storage at a special price": [
         "Navyšte tarif nyní a získejte tím prémiové funkce, produkty a úložiště za speciální cenu"
       ],
       "Upgrade or clear space anytime to bring over the rest": [
-        "Kdykoli upgradujte nebo uvolněte místo, abyste přenesli i zbytek"
+        "Navyšte účet nebo uvolněte místo, abyste přenesli i zbytek"
       ],
       "Upgrade to keep your ${ planTitle } benefits.": [
         "Navyšte tarif a zachovejte si své výhody ${ planTitle }."
@@ -7550,7 +7547,10 @@
         "Stále budete moci prohlížet data vlastního účtu, ale všechny uživatelské účty budou z vaší organizace odebrány."
       ],
       "Insert image": [
-        "Vložit obrázek"
+        "Vložit obrázek",
+        "Vložit obrázky",
+        "Vložit obrázky",
+        "Vložit obrázky"
       ],
       "${ boldBulkDelete }, archive, or move old emails to a folder.": [
         "${ boldBulkDelete }, archivace nebo přesunutí starých e-mailů do složky."
@@ -7655,7 +7655,7 @@
         "${ MAIL_APP_NAME } může chránit i vaši firmu."
       ],
       "${ MAIL_APP_NAME } now automatically sorts your emails into categories like Primary, Social, Promotions, and more, helping you find and manage messages more easily.": [
-        "${ MAIL_APP_NAME } nyní automaticky třídí vaše e-maily do kategorií, jako jsou Primární, Sociální sítě, Propagace a další, což vám pomáhá snadněji vyhledávat a spravovat vaše zprávy."
+        "${ MAIL_APP_NAME } nyní automaticky třídí vaše e-maily do kategorií, jako jsou Primární, Sociální sítě, Propagační akce a další, což vám pomáhá snadněji vyhledávat a spravovat vaše zprávy."
       ],
       "${ n } unread conversation": [
         "${ n } nepřečtená konverzace",
@@ -7760,10 +7760,10 @@
         "**Pozvěte své přátele** do ${ BRAND_NAME } pomocí svého doporučujícího odkazu."
       ],
       "**They get ${ refereeRewardAmount }** in credits if they subscribe.": [
-        "**Oni získají ${ refereeRewardAmount }** v kreditech, pokud si přihlásí odběr."
+        "**Získají ${ refereeRewardAmount }** v kreditech, pokud si pořídí předplatné."
       ],
       "**You get ${ referrerRewardAmount }** in credits for every friend that subscribes.": [
-        "**Získáte ${ referrerRewardAmount }** v kreditech za každého přítele, který si přihlásí odběr."
+        "**Získáte ${ referrerRewardAmount }** kreditů za každého přítele, který si pořídí předplatné."
       ],
       "A request to unsubscribe from this mailing list will be sent to the sender of the newsletter and automatically processed.": [
         "Žádost o odhlášení z tohoto seznamu bude odeslána odesílateli a automaticky zpracována."
@@ -8045,7 +8045,7 @@
         "Chcete-li získat více výsledků vyhledávání, zkuste toto klíčové slovo vyhledat v obsahu e-mailových zpráv."
       ],
       "Forgot password?": [
-        "Zapomenuté heslo?"
+        "Zapomněli jste heslo?"
       ],
       "Free to try for ${ ASSISTANT_TRIAL_TIME_DAYS } day": [
         "${ ASSISTANT_TRIAL_TIME_DAYS } den na vyzkoušení zdarma",
@@ -8240,7 +8240,7 @@
         "Vytisknout e-mail"
       ],
       "Private by design.": [
-        "Soukromé už ze své podstaty."
+        "Navrženo s ohledem na soukromí"
       ],
       "Proofread selection": [
         "Korektury výběru"
@@ -8663,7 +8663,7 @@
         "Z následujících odkazů jsme odebrali informace sloužící ke sledování, abychom vás ochránili před inzerenty a dalšími subjekty, kteří se snaží sledovat vaši online aktivitu."
       ],
       "We'll remind you to verify your password again later": [
-        "Později Vám připomeneme, abyste si znovu ověřili své heslo"
+        "Později vám připomeneme, abyste si znovu ověřili své heslo"
       ],
       "When do you want your message to be automatically deleted from the recipient's inbox and your sent folder?": [
         "Kdy chcete, aby byla vaše zpráva automaticky smazána z doručené pošty příjemce a z vaší složky odeslaných zpráv?"
@@ -8888,7 +8888,7 @@
         "WKD"
       ],
       "Active Signer": [
-        "Aktivní podpisový klíč"
+        "Aktivní podepisovatel"
       ],
       "Fallback": [
         "Záložní"
@@ -9767,7 +9767,7 @@
         "Vyčištěno"
       ],
       "Clear logs": [
-        "Zrušit logy"
+        "Vyčistit logy"
       ],
       "Context page": [
         "Stránka kontextu"
@@ -9794,7 +9794,7 @@
         "Nezobrazovat tento návrh"
       ],
       "Drive": [
-        "Disk"
+        "Drive"
       ],
       "Elements in store": [
         "Prvky v úložišti"
@@ -9908,7 +9908,7 @@
         "Velikost:"
       ],
       "Sort": [
-        "Seřadit"
+        "Řazení"
       ],
       "Store state": [
         "Stav úložiště"
@@ -11205,7 +11205,7 @@
         "Bez podpory streamování"
       ],
       "Unlock streaming": [
-        "Odblokování streamování"
+        "Odemkněte streamování"
       ]
     },
     "new_plans: feature highlight": {
@@ -12678,13 +12678,13 @@
         "Předmět"
       ],
       "Tell ${ subject } what to write. Example: “Announce upcoming events in a newsletter”": [
-        "Sdělte ${ subject }, co má napsat. Příklad: „Oznamte nadcházející události ve zpravodaji“"
+        "Sdělte ${ subject }, co má napsat. Příklad: \"Oznamte nadcházející události v e-mailovém zpravodaji\""
       ],
       "Tell ${ subject } what to write. Example: “Cancel my gym membership”": [
-        "Sdělte subjektu ${ subject }, co má napsat. Příklad: „Zrušit moje členství v posilovně“"
+        "Sdělte ${ subject }, co má napsat. Příklad: „Zruš moje členství v posilovně“"
       ],
       "Tell ${ subject } what to write. Example: “Invite Jane to my party”": [
-        "Sdělte ${ subject }, co má napsat. Příklad: „Pozvi Janu na večírek“"
+        "Sdělte ${ subject }, co má napsat. Příklad: \"Pozvi Janu na večírek\""
       ],
       "Tell ${ subject } what to write. Example: “Thank my coworker for help on a project”": [
         "Sdělte ${ subject }, co má napsat. Příklad: „Poděkuj mému kolegovi za pomoc s projektem“"
@@ -12696,7 +12696,7 @@
         "Sdělte ${ subject }, co má napsat. Příklad: „Napiš následný e-mail zákazníkovi“"
       ],
       "the writing assistant": [
-        "asistent psaní"
+        "asistentovi psaní"
       ],
       "To": [
         "Komu"
@@ -15856,7 +15856,7 @@
         "Chyba při ověření"
       ],
       "Verify your password": [
-        "Ověření hesla"
+        "Ověřte své heslo"
       ],
       "We protected you from ${ trackersCount } tracker": [
         "Ochránili jsme vás před ${ trackersCount } sledovacím prvkem",
@@ -15880,10 +15880,10 @@
         "Vaše e-mailové zpravodaje na jednom místě"
       ],
       "Mailing list": [
-        "{count, plural, one {E-mailový seznam} few {E-mailové seznamy} many {E-mailových seznamů} other {E-mailové seznamy}}",
-        "{count, plural, one {e-mailový seznam} few {e-mailové seznamy} many {e-mailových seznamů} other {e-mailových seznamů}}",
-        "{count, plural, one {e-mailový seznam} few {e-mailové seznamy} many {e-mailových seznamů} other {e-mailových seznamů}}",
-        "{count, plural, one {e-mailový seznam} few {e-mailové seznamy} many {e-mailových seznamů} other {e-mailových seznamů}}"
+        "E-mailový seznam",
+        "E-mailové seznamy",
+        "E-mailové seznamy",
+        "E-mailové seznamy"
       ]
     },
     "Today icon tooltip in mini calendar": {
@@ -17696,6 +17696,20 @@
       ],
       "Sun, ${ formatTime }": [
         "Neděle, ${ formatTime }"
+      ]
+    },
+    "Title header for keys table": {
+      "Actions": [
+        "Akce"
+      ],
+      "Fingerprint": [
+        "Digitální otisk"
+      ],
+      "Status": [
+        "Stav"
+      ],
+      "Type": [
+        "Typ"
       ]
     }
   }

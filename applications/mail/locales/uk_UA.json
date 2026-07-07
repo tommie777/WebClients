@@ -1559,6 +1559,9 @@
       ],
       "Your email writing assistant": [
         "Ваш помічник з написання електронних листів"
+      ],
+      "Trust key": [
+        "Довіряти ключу"
       ]
     },
     "action": {
@@ -6481,6 +6484,9 @@
         "Ваш план починається ${ renewalTime } і буде автоматично поновлюватися щомісяця."
       ],
       "Insert image": [
+        "Вставити зображення",
+        "Вставити зображення",
+        "Вставити зображення",
         "Вставити зображення"
       ],
       "${ BRAND_NAME } Scribe helps you craft better emails quickly and effortlessly.": [

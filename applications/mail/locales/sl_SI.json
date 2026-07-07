@@ -1204,10 +1204,7 @@
         "Preklopi priporočila"
       ],
       "Trust key": [
-        "Ključ zaupanja",
-        "Ključa zaupanja",
-        "Ključi zaupanja",
-        "Ključev zaupanja"
+        "Zaupaj ključu"
       ],
       "Verify now": [
         "Preveri zdaj"
@@ -8227,7 +8224,10 @@
         "Vsi vaši stiki bodo uvoženi, do meje ${ maxContact }."
       ],
       "Insert image": [
-        "Vstavi sliko"
+        "Vstavi sliko",
+        "Vstavi sliki",
+        "Vstavi slike",
+        "Vstavi slik"
       ],
       "You'll then be billed every ${ renewCycle } month at ${ renewAmountStr }. You can cancel at any time.": [
         "Nato boste vsak ${ renewCycle } mesec prejeli račun v znesku ${ renewAmountStr }. Prekličete lahko kadarkoli.",
@@ -16597,6 +16597,11 @@
       ],
       "Unsubscribed": [
         "Odjavili ste se"
+      ]
+    },
+    "Title header for keys table": {
+      "Type": [
+        "Vrsta"
       ]
     }
   }

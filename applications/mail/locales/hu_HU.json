@@ -1614,8 +1614,7 @@
         "A Tracker védelem megakadályozta egyes képek betöltését. Töltse be őket, ha megbízik a feladóban."
       ],
       "Trust key": [
-        "Kulcs megjelölése megbízhatóként",
-        "Kulcsok megjelölése megbízhatóként"
+        "Megbízható kulcs"
       ],
       "Trust public key": [
         "Nyilvános kulcs megjelölése megbízhatóként"
@@ -6935,6 +6934,7 @@
         "Továbbra is megtekintheti saját fiókadatait, de az összes felhasználói fiók eltávolításra kerül a szervezetéből."
       ],
       "Insert image": [
+        "Kép beillesztése",
         "Kép beillesztése"
       ],
       "${ boldBulkDelete }, archive, or move old emails to a folder.": [
