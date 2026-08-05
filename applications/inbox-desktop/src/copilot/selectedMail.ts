@@ -340,21 +340,36 @@ const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resol
 
 let activeSelectionGeneration = 0;
 let lastScheduledSelection = "";
+let lastSubmittedMailFingerprint = "";
+let lastSubmittedSelectionKey = "";
+
+const mailFingerprint = (mail: SelectedMailContent): string =>
+    JSON.stringify({
+        subject: mail.subject,
+        senderEmail: mail.senderEmail,
+        recipientDomain: mail.recipientDomain,
+        messages: mail.messages,
+    });
 
 const extractSelectedMail = async (
     contents: WebContents,
     selection: SelectedMail,
     generation: number,
 ): Promise<SelectedMailContent | null> => {
+    const selectionKey = JSON.stringify(selection);
     for (let attempt = 0; attempt < 20 && generation === activeSelectionGeneration; attempt += 1) {
-        if (attempt) {
-            await wait(250);
-        }
+        // The URL changes before Proton replaces the previous conversation in
+        // the renderer. Give that transition time and never submit the last
+        // successfully handled mail under a newly selected conversation ID.
+        await wait(attempt === 0 ? 400 : 250);
         try {
             const value = await executePageFunction<ExtractedMailValue>(contents, extractMailInPage);
             const normalized = normalizeExtractedMail(value, selection);
             if (normalized) {
-                return normalized;
+                const fingerprint = mailFingerprint(normalized);
+                if (fingerprint !== lastSubmittedMailFingerprint || selectionKey === lastSubmittedSelectionKey) {
+                    return normalized;
+                }
             }
         } catch {
             // The renderer may still be replacing the selected conversation.
@@ -478,9 +493,12 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
             signal: AbortSignal.timeout(3_000),
         });
         if (contentResponse.ok && generation === activeSelectionGeneration) {
+            lastSubmittedMailFingerprint = mailFingerprint(mail);
+            lastSubmittedSelectionKey = key;
             void pollForCopilotAction(endpoint, token, contents, selection, generation);
         } else if (!contentResponse.ok) {
-            mainLogger.warn("Local Copilot mail content returned HTTP", contentResponse.status);
+            const details = await contentResponse.json().catch(() => null);
+            mainLogger.warn("Local Copilot mail content returned HTTP", contentResponse.status, details);
         }
     } catch {
         // The local copilot helper is optional and must never interrupt mail.
