@@ -78,7 +78,7 @@ export function handleWebContents(contents: WebContents) {
         }
 
         if (getWebContentsViewName(contents) === "mail") {
-            void notifyCopilotOfSelectedMail(url);
+            void notifyCopilotOfSelectedMail(url, contents);
         }
 
         // App switch shortcuts should be disabled when the account is present. In some cases we can display
@@ -136,7 +136,7 @@ export function handleWebContents(contents: WebContents) {
         }
 
         if (getWebContentsViewName(contents) === "mail") {
-            void notifyCopilotOfSelectedMail(url);
+            void notifyCopilotOfSelectedMail(url, contents);
         }
 
         if (isAccountLogin(url) || isAccountSwitch(url)) {
