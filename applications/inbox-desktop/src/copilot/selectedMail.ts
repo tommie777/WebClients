@@ -1,8 +1,6 @@
 import { clipboard, type WebContents } from "electron";
-import { readFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { mainLogger } from "../utils/log";
+import { copilotBridgeToken, copilotRequestHeaders, copilotSelectionEndpoint } from "./backendConfig";
 
 export type SelectedMail = {
     labelID: string;
@@ -43,28 +41,6 @@ type CopilotAction = {
     draft: string;
 };
 
-type BridgeConfig = {
-    selectionURL?: unknown;
-    bridgeToken?: unknown;
-};
-
-const loadBridgeConfig = (): BridgeConfig => {
-    try {
-        const configPath = join(
-            homedir(),
-            "Library",
-            "Application Support",
-            "Colorspace Proton Copilot",
-            "copilot-bridge.json",
-        );
-        return JSON.parse(readFileSync(configPath, "utf8")) as BridgeConfig;
-    } catch {
-        return {};
-    }
-};
-
-const bridgeConfig = loadBridgeConfig();
-
 const RESERVED_MAIL_ROUTES = new Set([
     "account",
     "bookings",
@@ -76,6 +52,11 @@ const RESERVED_MAIL_ROUTES = new Set([
     "upgrade",
 ]);
 
+const isControlCharacter = (character: string): boolean => {
+    const code = character.charCodeAt(0);
+    return code <= 31 || code === 127;
+};
+
 const safePathSegment = (value: string | undefined): string | undefined => {
     if (!value) {
         return undefined;
@@ -83,7 +64,12 @@ const safePathSegment = (value: string | undefined): string | undefined => {
 
     try {
         const decoded = decodeURIComponent(value);
-        if (decoded.length > 256 || /[\u0000-\u001f\u007f/\\]/.test(decoded)) {
+        if (
+            decoded.length > 256 ||
+            Array.from(decoded).some(
+                (character) => isControlCharacter(character) || character === "/" || character === "\\",
+            )
+        ) {
             return undefined;
         }
         return decoded;
@@ -124,35 +110,14 @@ export const selectedMailFromURL = (rawURL: string): SelectedMail | null => {
     };
 };
 
-const loopbackEndpoint = (): URL | null => {
-    const configuredValue = process.env.COLORSPACE_COPILOT_SELECTION_URL ?? bridgeConfig.selectionURL;
-    const configured = typeof configuredValue === "string" ? configuredValue.trim() : "";
-    if (!configured) {
-        return null;
-    }
-
-    try {
-        const url = new URL(configured);
-        const loopbackHosts = new Set(["127.0.0.1", "::1", "[::1]", "localhost"]);
-        if (url.protocol !== "http:" || !loopbackHosts.has(url.hostname) || url.username || url.password) {
-            return null;
-        }
-        return url;
-    } catch {
-        return null;
-    }
-};
-
-const bridgeToken = (): string | null => {
-    const configuredValue = process.env.COLORSPACE_COPILOT_BRIDGE_TOKEN ?? bridgeConfig.bridgeToken;
-    const value = typeof configuredValue === "string" ? configuredValue.trim() : "";
-    return value && value.length >= 24 ? value : null;
-};
-
 const cleanText = (value: unknown, maximum: number): string => {
     return typeof value === "string"
-        ? value
-              .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]+/g, " ")
+        ? Array.from(value, (character) =>
+              isControlCharacter(character) && character !== "\t" && character !== "\n" && character !== "\r"
+                  ? " "
+                  : character,
+          )
+              .join("")
               .trim()
               .slice(0, maximum)
         : "";
@@ -431,7 +396,6 @@ const extractSelectedMail = async (
 
 const pollForCopilotAction = async (
     endpoint: URL,
-    token: string,
     contents: WebContents,
     selection: SelectedMail,
     generation: number,
@@ -442,7 +406,7 @@ const pollForCopilotAction = async (
         await wait(2_000);
         try {
             const response = await fetch(actionEndpoint, {
-                headers: { "X-Colorspace-Copilot-Token": token },
+                headers: copilotRequestHeaders(),
                 redirect: "error",
                 signal: AbortSignal.timeout(1_500),
             });
@@ -495,10 +459,7 @@ const pollForCopilotAction = async (
             }
             await fetch(actionEndpoint, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Colorspace-Copilot-Token": token,
-                },
+                headers: copilotRequestHeaders(true),
                 body: JSON.stringify({ id: action.id }),
                 redirect: "error",
                 signal: AbortSignal.timeout(1_500),
@@ -511,7 +472,7 @@ const pollForCopilotAction = async (
 };
 
 export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: WebContents): Promise<void> => {
-    const endpoint = loopbackEndpoint();
+    const endpoint = copilotSelectionEndpoint();
     const selection = selectedMailFromURL(rawURL);
     if (!endpoint) {
         return;
@@ -532,7 +493,7 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
     try {
         const response = await fetch(endpoint, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: copilotRequestHeaders(true),
             body: JSON.stringify({
                 type: "proton-mail-selection",
                 version: 1,
@@ -542,14 +503,14 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
             signal: AbortSignal.timeout(1_500),
         });
         if (!response.ok) {
-            mainLogger.warn("Local Copilot selection metadata returned HTTP", response.status);
+            mainLogger.warn("Mail Copilot selection metadata returned HTTP", response.status);
             return;
         }
         if (!contents || generation !== activeSelectionGeneration) {
             return;
         }
 
-        const token = bridgeToken();
+        const token = copilotBridgeToken();
         if (!token) {
             return;
         }
@@ -559,10 +520,7 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
         }
         const contentResponse = await fetch(endpoint, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Colorspace-Copilot-Token": token,
-            },
+            headers: copilotRequestHeaders(true),
             body: JSON.stringify({
                 type: "proton-mail-selection",
                 version: 1,
@@ -575,10 +533,10 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
         if (contentResponse.ok && generation === activeSelectionGeneration) {
             lastSubmittedMailFingerprint = mailFingerprint(mail);
             lastSubmittedSelectionKey = key;
-            void pollForCopilotAction(endpoint, token, contents, selection, generation);
+            void pollForCopilotAction(endpoint, contents, selection, generation);
         } else if (!contentResponse.ok) {
             const details = await contentResponse.json().catch(() => null);
-            mainLogger.warn("Local Copilot mail content returned HTTP", contentResponse.status, details);
+            mainLogger.warn("Mail Copilot mail content returned HTTP", contentResponse.status, details);
         }
     } catch {
         // The local copilot helper is optional and must never interrupt mail.

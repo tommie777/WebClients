@@ -7,6 +7,7 @@ import { getSettings } from "../store/settingsStore";
 import { getFeatureFlagManager } from "./flags/manager";
 import { FeatureFlag } from "./flags/flags";
 import { updateTrackedUID } from "./electronSession/uidTracker";
+import { copilotRequestHeaders, isCloudCopilotURL } from "../copilot/backendConfig";
 
 export const appSession = () => {
     const cache = getSettings().appCacheEnabled || false;
@@ -40,20 +41,22 @@ export const setRequestPermission = () => {
 export const extendAppVersionHeader = () => {
     const ffManager = getFeatureFlagManager();
     appSession().webRequest.onBeforeSendHeaders((details, change) => {
-        const uid = details.requestHeaders["x-pm-uid"];
+        const requestHeaders = { ...details.requestHeaders };
+        if (isCloudCopilotURL(details.url)) {
+            Object.assign(requestHeaders, copilotRequestHeaders());
+        }
+
+        const uid = requestHeaders["x-pm-uid"];
         if (uid !== undefined && details.webContentsId !== undefined) {
             updateTrackedUID(details.webContentsId, uid);
         }
 
-        if (
-            ffManager.isEnabled(FeatureFlag.APPVERSION_EXTENSION_DISABLED) ||
-            !details.requestHeaders["x-pm-appversion"]
-        ) {
-            change({});
+        if (ffManager.isEnabled(FeatureFlag.APPVERSION_EXTENSION_DISABLED) || !requestHeaders["x-pm-appversion"]) {
+            change({ requestHeaders });
             return;
         }
 
-        details.requestHeaders["x-pm-appversion"] += `+id${app.getVersion()}`;
-        change({ requestHeaders: details.requestHeaders });
+        requestHeaders["x-pm-appversion"] += `+id${app.getVersion()}`;
+        change({ requestHeaders });
     });
 };

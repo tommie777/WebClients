@@ -43,6 +43,8 @@ import { isUserNetworkErrorCode, NET_ERROR_CODE } from "../netErrors";
 import { getFileResourcePath } from "../../constants/resources";
 import { getCopilotSidecarLayout } from "../../copilot/sidecarLayout";
 import pkg from "../../../package.json";
+import { copilotAppURL } from "../../copilot/backendConfig";
+import { appSession } from "../session";
 
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
@@ -97,7 +99,7 @@ const saveCopilotSidecarWidth = debounce((width: number) => {
 }, 300);
 
 const colorspaceCopilotEnabled = pkg.config.colorspaceCopilot;
-const copilotSidecarURL = process.env.COLORSPACE_COPILOT_APP_URL?.trim() || "http://127.0.0.1:3210/?sidecar=1";
+const copilotSidecarURL = copilotAppURL().toString();
 
 export const IGNORED_NET_ERROR_CODES: number[] = [NET_ERROR_CODE.ABORTED];
 
@@ -273,6 +275,7 @@ const createCopilotSidecarView = () => {
     copilotSidecarWidth = getSettings().colorspaceCopilotSidecarWidth;
     const view = new WebContentsView({
         webPreferences: {
+            session: appSession(),
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
