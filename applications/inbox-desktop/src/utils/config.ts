@@ -10,17 +10,11 @@ export const getIco = () => {
 };
 
 export const getIcon = () => {
-    if (isBetaRelease) {
-        return "icon-beta";
-    }
-    return "icon";
+    return "colorspace-copilot";
 };
 
 export const getName = () => {
-    if (isBetaRelease) {
-        return "Proton Mail Beta";
-    }
-    return "Proton Mail";
+    return "Colorspace Proton Copilot";
 };
 
 export const getExtraResource = () => {
@@ -39,7 +33,6 @@ export const getExtraResource = () => {
                 ...commonResources,
                 "./src/macos/Proton Mail Uninstaller.app",
                 "./src/macos/uninstall.sh",
-                "./assets/macos/tahoe-icon/Assets.car",
             ];
         case "Windows_NT":
             return [

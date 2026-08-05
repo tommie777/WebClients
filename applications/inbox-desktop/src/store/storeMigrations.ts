@@ -7,6 +7,7 @@ import { loadDefaultProtocol } from "../utils/protocol/store";
 import { mainLogger } from "../utils/log";
 import { DESKTOP_FEATURES } from "../ipc/ipcConstants";
 import { ThemeModeSetting, ThemeTypes } from "@proton/shared/lib/themes/constants";
+import pkg from "../../package.json";
 
 const store = new Store();
 
@@ -90,7 +91,7 @@ const forceLightAndDarkThemes = () => {
 
 // We start asking to set app as default mail client from this point
 const checkDefaultMailClient = () => {
-    if (!DESKTOP_FEATURES.MailtoUpdate) {
+    if (pkg.config.colorspaceCopilot || !DESKTOP_FEATURES.MailtoUpdate) {
         return;
     }
 

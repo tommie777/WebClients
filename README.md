@@ -1,5 +1,37 @@
 # Web clients
 
+## Colorspace Proton Copilot
+
+Deze fork bevat een apart geïsoleerde desktopvariant voor de Colorspace Mail
+Copilot. De macOS-app gebruikt:
+
+- appnaam **Colorspace Proton Copilot**;
+- bundle-ID `nl.colorspace.proton-copilot`;
+- profielmap `~/Library/Application Support/Colorspace Proton Copilot`;
+- een eigen blauw Copilot-icoon.
+
+De profielmap en single-instance lock zijn gescheiden van de officiële Proton
+Mail-app. Beide apps kunnen daardoor tegelijk draaien. De eerste keer moet in
+de Colorspace-app apart bij Proton worden ingelogd; accounts, cookies en cache
+van de officiële app worden niet gekopieerd.
+
+Om conflicten te vermijden registreert deze interne variant geen `mailto:`-
+handler, vraagt hij niet om standaard mail-app te worden en gebruikt hij niet
+Protons automatische updater of Sentry-configuratie. Mailverkeer en encryptie
+blijven via de bestaande Proton-webclient lopen; de Colorspace-aanpassing leest
+alleen de actief geopende conversatie voor de lokale Copilot-bridge.
+
+Start de ontwikkelvariant bij voorkeur via het hoofdproject:
+
+```bash
+cd /Users/imackaartendrukkerij/Documents/ColorspaceMailCopilot
+nvm use 24
+npm run proton
+```
+
+De achtergrondservice op poort 3210 moet daarbij actief zijn; controleer die
+met `npm run service:status` in hetzelfde hoofdproject.
+
 This project is a monorepo hosting the Proton web clients. It includes the web applications, their dependencies & shared modules as well as all tooling surrounding development of the web clients (as well as some additional miscellaneous things).
 
 - <img src="./applications/mail/src/favicon.svg" style="vertical-align: middle" height="20" width="20" /> <span style="vertical-align: middle; display: inline-block">Proton Mail</span>
