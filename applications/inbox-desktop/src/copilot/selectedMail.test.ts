@@ -81,4 +81,23 @@ describe("normalizeExtractedMail", () => {
             ),
         ).toBeNull();
     });
+
+    it("keeps related conversation metadata for the Copilot sidecar", () => {
+        const result = normalizeExtractedMail(
+            {
+                subject: "Vraag over order",
+                senderEmail: "klant@example.nl",
+                messages: [{ direction: "inbound", bodyText: "Zie mijn andere mail." }],
+                relatedConversations: [
+                    { elementID: "conversation-related", subject: "Bestanden", participants: "klant@example.nl", sentAt: "vandaag" },
+                    { elementID: selection.elementID, subject: "Huidige mail", participants: "klant@example.nl", sentAt: "vandaag" },
+                ],
+            },
+            selection,
+        );
+
+        expect(result?.relatedConversations).toEqual([
+            { elementID: "conversation-related", subject: "Bestanden", participants: "klant@example.nl", sentAt: "vandaag" },
+        ]);
+    });
 });

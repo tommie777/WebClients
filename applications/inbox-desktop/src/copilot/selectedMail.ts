@@ -1,4 +1,4 @@
-import { clipboard, type WebContents } from "electron";
+import { clipboard, webContents as electronWebContents, type WebContents } from "electron";
 import { mainLogger } from "../utils/log";
 import { copilotBridgeToken, copilotRequestHeaders, copilotSelectionEndpoint } from "./backendConfig";
 
@@ -35,11 +35,21 @@ type ExtractedMailValue = {
     relatedConversations?: unknown;
 };
 
-type CopilotAction = {
+type InsertDraftAction = {
+    type: "insert-draft";
     id: string;
     selectionElementID: string;
     draft: string;
 };
+
+type OpenConversationAction = {
+    type: "open-conversation";
+    id: string;
+    selectionElementID: string;
+    elementID: string;
+};
+
+type CopilotAction = InsertDraftAction | OpenConversationAction;
 
 const RESERVED_MAIL_ROUTES = new Set([
     "account",
@@ -256,9 +266,16 @@ function extractMailInPage(): ExtractedMailValue {
 }
 
 function focusDraftEditorInPage(): boolean {
-    // Composer ids and wrappers vary between Proton web releases. Resolve the
-    // last visible editor itself instead of depending on a generated frame id.
-    const textarea = Array.from(document.querySelectorAll('[data-testid="editor-textarea"]'))
+    const composer = Array.from(
+        document.querySelectorAll<HTMLElement>("section.composer:not(.composer--is-minimized):not(.composer--is-blur)"),
+    )
+        .filter((node) => node.getClientRects().length > 0)
+        .at(-1);
+    if (!composer) return false;
+
+    const textarea = Array.from(
+        composer.querySelectorAll('textarea[data-testid="editor-textarea"], textarea.editor-textarea'),
+    )
         .filter((node) => node.getClientRects().length > 0)
         .at(-1);
     if (textarea instanceof HTMLTextAreaElement) {
@@ -267,11 +284,14 @@ function focusDraftEditorInPage(): boolean {
         return true;
     }
 
-    const frame = Array.from(document.querySelectorAll("iframe"))
+    const frame = Array.from(
+        composer.querySelectorAll<HTMLIFrameElement>('iframe[data-testid="rooster-iframe"], iframe'),
+    )
         .filter((candidate) => candidate.getClientRects().length > 0)
         .filter((candidate) => {
             try {
                 return Boolean(
+                    candidate.contentDocument?.getElementById("rooster-editor") ||
                     candidate.contentDocument?.querySelector('[contenteditable]:not([contenteditable="false"])'),
                 );
             } catch {
@@ -282,7 +302,9 @@ function focusDraftEditorInPage(): boolean {
     if (!(frame instanceof HTMLIFrameElement)) {
         return false;
     }
-    const editor = frame.contentDocument?.querySelector('[contenteditable]:not([contenteditable="false"])');
+    const editor =
+        frame.contentDocument?.getElementById("rooster-editor") ||
+        frame.contentDocument?.querySelector('[contenteditable]:not([contenteditable="false"])');
     if (!(editor instanceof HTMLElement) || !frame.contentDocument) {
         return false;
     }
@@ -296,21 +318,99 @@ function focusDraftEditorInPage(): boolean {
     return true;
 }
 
-function draftPresentInPage(sample: string): boolean {
-    const textarea = Array.from(document.querySelectorAll('[data-testid="editor-textarea"]'))
+function richTextEditorStateInPage(sample: string): { ready: boolean; length: number; startsWithSample: boolean } {
+    const normalizedSample = sample.trim().replace(/\s+/g, " ").slice(0, 80);
+    const composer = Array.from(
+        document.querySelectorAll<HTMLElement>("section.composer:not(.composer--is-minimized):not(.composer--is-blur)"),
+    )
         .filter((node) => node.getClientRects().length > 0)
         .at(-1);
-    if (textarea instanceof HTMLTextAreaElement) {
-        return textarea.value.includes(sample);
-    }
-    return Array.from(document.querySelectorAll("iframe")).some((frame) => {
+    if (!composer) return { ready: false, length: 0, startsWithSample: false };
+    const frames = Array.from(composer.querySelectorAll<HTMLIFrameElement>('iframe[data-testid="rooster-iframe"]'))
+        .filter((frame) => frame.getClientRects().length > 0)
+        .reverse();
+    for (const frame of frames) {
         try {
-            const editor = frame.contentDocument?.querySelector('[contenteditable]:not([contenteditable="false"])');
-            return editor?.textContent?.includes(sample) ?? false;
+            const editor = frame.contentDocument?.getElementById("rooster-editor");
+            if (!(editor instanceof HTMLElement)) continue;
+            const normalizedText = (editor.textContent || "").replace(/\s+/g, " ").trim();
+            return {
+                ready: editor.isContentEditable,
+                length: normalizedText.length,
+                startsWithSample: Boolean(normalizedSample) && normalizedText.startsWith(normalizedSample),
+            };
         } catch {
-            return false;
+            // Proton may be replacing the composer frame.
         }
-    });
+    }
+    return { ready: false, length: 0, startsWithSample: false };
+}
+
+function focusRichTextEditorInPage(): "ready" | "switching" | "missing" {
+    const visible = (node: Element) => node.getClientRects().length > 0;
+    const composer = Array.from(
+        document.querySelectorAll<HTMLElement>("section.composer:not(.composer--is-minimized):not(.composer--is-blur)"),
+    )
+        .filter(visible)
+        .at(-1);
+    if (!composer) return "missing";
+    const frames = Array.from(composer.querySelectorAll<HTMLIFrameElement>('iframe[data-testid="rooster-iframe"]'))
+        .filter(visible)
+        .reverse();
+    for (const frame of frames) {
+        try {
+            const frameDocument = frame.contentDocument;
+            const editor = frameDocument?.getElementById("rooster-editor");
+            if (!(editor instanceof HTMLElement) || !frameDocument || !editor.isContentEditable) continue;
+            editor.focus();
+            const selection = frame.contentWindow?.getSelection();
+            const range = frameDocument.createRange();
+            range.selectNodeContents(editor);
+            range.collapse(true);
+            selection?.removeAllRanges();
+            selection?.addRange(range);
+            return "ready";
+        } catch {
+            // Proton may be replacing the composer frame.
+        }
+    }
+
+    const toHtml = Array.from(
+        document.querySelectorAll(
+            '[data-testid="editor-to-html"], .editor-toolbar-dropdown button, .editor-toolbar-dropdown [role="menuitem"]',
+        ),
+    )
+        .filter(visible)
+        .filter((node) => {
+            if (node.getAttribute("data-testid") === "editor-to-html") return true;
+            const label = (node.textContent || "").trim().toLocaleLowerCase();
+            return label === "normal" || label === "normaal";
+        })
+        .at(-1);
+    if (toHtml instanceof HTMLElement) {
+        toHtml.click();
+        return "switching";
+    }
+
+    const plainTextEditor = Array.from(
+        composer.querySelectorAll('[data-testid="editor-textarea"], textarea.editor-textarea'),
+    )
+        .filter(visible)
+        .at(-1);
+    if (plainTextEditor) {
+        const moreOptions = Array.from(
+            composer.querySelectorAll(
+                '[data-testid="composer:more-options-button"], button.composer-more-dropdown, .composer-more-dropdown button',
+            ),
+        )
+            .filter(visible)
+            .at(-1);
+        if (moreOptions instanceof HTMLElement) {
+            moreOptions.click();
+            return "switching";
+        }
+    }
+    return "missing";
 }
 
 function clickReplyInPage(): boolean {
@@ -326,6 +426,14 @@ function clickReplyInPage(): boolean {
         return true;
     }
     return false;
+}
+
+function clickConversationInPage(elementID: string): boolean {
+    const items = Array.from(document.querySelectorAll<HTMLElement>('[data-element-id]'));
+    const target = items.find((item) => item.getAttribute("data-element-id") === elementID);
+    if (!target || target.getClientRects().length === 0) return false;
+    target.click();
+    return true;
 }
 
 const executePageFunction = async <T, TArgs extends unknown[] = []>(
@@ -348,11 +456,93 @@ const actionFromValue = (value: unknown): CopilotAction | null => {
     const record = action as Record<string, unknown>;
     const id = cleanText(record.id, 100);
     const selectionElementID = cleanText(record.selectionElementID, 256);
+    const type = cleanText(record.type, 50);
+    if (type === "open-conversation") {
+        const elementID = cleanText(record.elementID, 256);
+        return id && selectionElementID && elementID
+            ? { type: "open-conversation", id, selectionElementID, elementID }
+            : null;
+    }
     const draft = cleanText(record.draft, 4_000);
-    return id && selectionElementID && draft ? { id, selectionElementID, draft } : null;
+    return id && selectionElementID && draft
+        ? { type: "insert-draft", id, selectionElementID, draft }
+        : null;
 };
 
 const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+const isProtonMailContents = (contents: WebContents): boolean => {
+    if (contents.isDestroyed()) return false;
+    try {
+        const url = new URL(contents.getURL());
+        return url.protocol === "https:" && ["mail.proton.me", "mail.proton.dev"].includes(url.hostname);
+    } catch {
+        return false;
+    }
+};
+
+const findComposerContents = async (): Promise<WebContents | null> => {
+    const candidates = [...electronWebContents.getAllWebContents()]
+        .filter(isProtonMailContents)
+        .filter((candidate) => candidate.isFocused())
+        .sort((left, right) => right.id - left.id);
+    for (const candidate of candidates) {
+        try {
+            if (await executePageFunction<boolean>(candidate, focusDraftEditorInPage)) return candidate;
+        } catch {
+            // A newly created composer may still be navigating.
+        }
+    }
+    return null;
+};
+
+const ensureRichTextEditor = async (contents: WebContents): Promise<boolean> => {
+    let readyChecks = 0;
+    for (let attempt = 0; attempt < 24; attempt += 1) {
+        const state = await executePageFunction<"ready" | "switching" | "missing">(contents, focusRichTextEditorInPage);
+        if (state === "ready") {
+            readyChecks += 1;
+            if (readyChecks >= 2) return true;
+        } else {
+            readyChecks = 0;
+        }
+        await wait(250);
+    }
+    return false;
+};
+
+const insertDraftInRichTextEditor = async (contents: WebContents, draft: string): Promise<boolean> => {
+    const state = () =>
+        executePageFunction<{ ready: boolean; length: number; startsWithSample: boolean }, [string]>(
+            contents,
+            richTextEditorStateInPage,
+            draft,
+        );
+    const before = await state();
+    if (!before.ready) return false;
+
+    await executePageFunction<"ready" | "switching" | "missing">(contents, focusRichTextEditorInPage);
+    contents.focus();
+    await wait(100);
+    await contents.insertText(`${draft}\n\n`);
+    await wait(750);
+    let after = await state();
+    if (after.ready && after.startsWithSample && after.length > before.length) return true;
+
+    await executePageFunction<"ready" | "switching" | "missing">(contents, focusRichTextEditorInPage);
+    contents.focus();
+    const previousClipboard = clipboard.readText();
+    const pastedContent = `${draft}\n\n`;
+    clipboard.writeText(pastedContent);
+    try {
+        contents.paste();
+        await wait(1_000);
+        after = await state();
+    } finally {
+        if (clipboard.readText() === pastedContent) clipboard.writeText(previousClipboard);
+    }
+    return after.ready && after.startsWithSample && after.length > before.length;
+};
 
 let activeSelectionGeneration = 0;
 let lastScheduledSelection = "";
@@ -418,43 +608,52 @@ const pollForCopilotAction = async (
                 continue;
             }
 
+            if (action.type === "open-conversation") {
+                const opened = await executePageFunction<boolean, [string]>(
+                    contents,
+                    clickConversationInPage,
+                    action.elementID,
+                );
+                if (!opened) {
+                    mainLogger.warn("Mail Copilot could not open the related Proton conversation");
+                    continue;
+                }
+                await fetch(actionEndpoint, {
+                    method: "POST",
+                    headers: copilotRequestHeaders(true),
+                    body: JSON.stringify({ id: action.id }),
+                    redirect: "error",
+                    signal: AbortSignal.timeout(1_500),
+                });
+                return;
+            }
+
             // The action originates in the Copilot WebContentsView, so return
             // keyboard focus to Proton before targeting its nested editor.
-            contents.focus();
-            await wait(50);
-            let editorReady = await executePageFunction<boolean>(contents, focusDraftEditorInPage);
-            if (!editorReady && !actionsWithReplyOpened.has(action.id)) {
+            let composerContents = await findComposerContents();
+            if (!composerContents && !actionsWithReplyOpened.has(action.id)) {
                 actionsWithReplyOpened.add(action.id);
+                contents.focus();
+                await wait(50);
                 await executePageFunction<boolean>(contents, clickReplyInPage);
-                for (let composerAttempt = 0; composerAttempt < 12 && !editorReady; composerAttempt += 1) {
+                for (let composerAttempt = 0; composerAttempt < 20 && !composerContents; composerAttempt += 1) {
                     await wait(250);
-                    editorReady = await executePageFunction<boolean>(contents, focusDraftEditorInPage);
+                    composerContents = await findComposerContents();
                 }
             }
-            if (!editorReady) {
+            if (!composerContents) {
+                mainLogger.warn("Mail Copilot could not find the Proton reply editor");
                 continue;
             }
-            // Use Chromium's native text-input path so Proton's rich-text
-            // editor receives the same editing events as keyboard input.
-            await contents.insertText(action.draft + "\n\n");
-            await wait(150);
-            let inserted = await executePageFunction<boolean, [string]>(
-                contents,
-                draftPresentInPage,
-                action.draft.slice(0, 80),
-            );
-            if (!inserted) {
-                await executePageFunction<boolean>(contents, focusDraftEditorInPage);
-                clipboard.writeText(action.draft + "\n\n");
-                contents.paste();
-                await wait(150);
-                inserted = await executePageFunction<boolean, [string]>(
-                    contents,
-                    draftPresentInPage,
-                    action.draft.slice(0, 80),
-                );
+            composerContents.focus();
+            await wait(100);
+            if (!(await ensureRichTextEditor(composerContents))) {
+                mainLogger.warn("Mail Copilot could not switch the Proton reply editor to rich text");
+                continue;
             }
+            const inserted = await insertDraftInRichTextEditor(composerContents, action.draft);
             if (!inserted) {
+                mainLogger.warn("Mail Copilot could not verify inserted reply text");
                 continue;
             }
             await fetch(actionEndpoint, {
