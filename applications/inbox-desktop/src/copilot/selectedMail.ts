@@ -1,4 +1,7 @@
 import type { WebContents } from "electron";
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 export type SelectedMail = {
     labelID: string;
@@ -31,6 +34,28 @@ type CopilotAction = {
     selectionElementID: string;
     draft: string;
 };
+
+type BridgeConfig = {
+    selectionURL?: unknown;
+    bridgeToken?: unknown;
+};
+
+const loadBridgeConfig = (): BridgeConfig => {
+    try {
+        const configPath = join(
+            homedir(),
+            "Library",
+            "Application Support",
+            "Colorspace Proton Copilot",
+            "copilot-bridge.json",
+        );
+        return JSON.parse(readFileSync(configPath, "utf8")) as BridgeConfig;
+    } catch {
+        return {};
+    }
+};
+
+const bridgeConfig = loadBridgeConfig();
 
 const RESERVED_MAIL_ROUTES = new Set([
     "account",
@@ -92,7 +117,8 @@ export const selectedMailFromURL = (rawURL: string): SelectedMail | null => {
 };
 
 const loopbackEndpoint = (): URL | null => {
-    const configured = process.env.COLORSPACE_COPILOT_SELECTION_URL?.trim();
+    const configuredValue = process.env.COLORSPACE_COPILOT_SELECTION_URL ?? bridgeConfig.selectionURL;
+    const configured = typeof configuredValue === "string" ? configuredValue.trim() : "";
     if (!configured) {
         return null;
     }
@@ -110,7 +136,8 @@ const loopbackEndpoint = (): URL | null => {
 };
 
 const bridgeToken = (): string | null => {
-    const value = process.env.COLORSPACE_COPILOT_BRIDGE_TOKEN?.trim();
+    const configuredValue = process.env.COLORSPACE_COPILOT_BRIDGE_TOKEN ?? bridgeConfig.bridgeToken;
+    const value = typeof configuredValue === "string" ? configuredValue.trim() : "";
     return value && value.length >= 24 ? value : null;
 };
 

@@ -21,16 +21,18 @@ Protons automatische updater of Sentry-configuratie. Mailverkeer en encryptie
 blijven via de bestaande Proton-webclient lopen; de Colorspace-aanpassing leest
 alleen de actief geopende conversatie voor de lokale Copilot-bridge.
 
-Start de ontwikkelvariant bij voorkeur via het hoofdproject:
+Start de geïnstalleerde Colorspace-app bij voorkeur via het hoofdproject:
 
 ```bash
 cd /Users/imackaartendrukkerij/Documents/ColorspaceMailCopilot
-nvm use 24
 npm run proton
 ```
 
 De achtergrondservice op poort 3210 moet daarbij actief zijn; controleer die
-met `npm run service:status` in hetzelfde hoofdproject.
+met `npm run service:status` in hetzelfde hoofdproject. De geïnstalleerde
+appbundel wordt vernieuwd met `nvm use 24` gevolgd door
+`npm run proton:install`. Gebruik `npm run proton:dev` alleen voor ontwikkeling;
+macOS toont uitsluitend die ontwikkelvariant onder de generieke naam Electron.
 
 This project is a monorepo hosting the Proton web clients. It includes the web applications, their dependencies & shared modules as well as all tooling surrounding development of the web clients (as well as some additional miscellaneous things).
 
