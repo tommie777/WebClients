@@ -7,6 +7,13 @@ import {
 } from "@proton/shared/lib/desktop/desktopTypes";
 import Logger from "electron-log";
 import { disableMouseNavigation } from "@proton/shared/lib/desktop/disableMouseNavigation";
+import {
+    ORDER_FILES_BROWSE_CHANNEL,
+    ORDER_FILES_DRAG_CHANNEL,
+    ORDER_FILES_OPEN_CHANNEL,
+    ORDER_FILES_REVEAL_CHANNEL,
+    type OrderFilesBrowseRequest,
+} from "./copilot/orderFilesContract";
 
 const preloadLogger = Logger.scope("preload");
 const isColorspaceCopilotSidecar = new URLSearchParams(window.location.search).has("sidecar");
@@ -59,6 +66,13 @@ if (isColorspaceCopilotSidecar) {
                 ipcRenderer.send("colorspace-copilot-sidecar-width", Math.round(width));
             }
         },
+    });
+
+    contextBridge.exposeInMainWorld("colorspaceOrderFiles", {
+        browse: (request: OrderFilesBrowseRequest) => ipcRenderer.invoke(ORDER_FILES_BROWSE_CHANNEL, request),
+        open: (id: string) => ipcRenderer.invoke(ORDER_FILES_OPEN_CHANNEL, id),
+        reveal: (id: string) => ipcRenderer.invoke(ORDER_FILES_REVEAL_CHANNEL, id),
+        startDrag: (ids: string[]) => ipcRenderer.send(ORDER_FILES_DRAG_CHANNEL, ids),
     });
 }
 

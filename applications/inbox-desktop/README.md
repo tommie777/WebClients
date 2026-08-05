@@ -23,3 +23,23 @@ selected conversation. It sends them over the loopback interface, waits for a
 reviewed draft, and inserts that draft into the active reply composer. It never
 presses Send. Missing or unavailable Copilot configuration must not interrupt
 normal Proton Mail operation.
+
+### Local order files
+
+The Copilot sidecar can browse the mounted, read-only order archive without
+exposing filesystem paths to the hosted Copilot page. By default the desktop
+app uses `/Volumes/webbestellingen` and resolves an order through
+`<year>/<Dutch month>/<order number>`. Files can be opened, revealed in Finder,
+or dragged from the sidecar into a Proton composer.
+
+For development, the fixed root can be overridden before launching Electron:
+
+```bash
+COLORSPACE_ORDER_FILES_ROOT='/path/to/test/archive' \
+  yarn workspace proton-inbox-desktop start
+```
+
+Only year folders, Dutch month folders, and descendants of the selected order
+folder are exposed. Symlinks and path traversal are rejected. The hosted UI
+receives opaque file tokens and metadata, never absolute local paths or file
+contents.

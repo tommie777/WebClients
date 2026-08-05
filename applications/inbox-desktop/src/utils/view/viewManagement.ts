@@ -1,4 +1,14 @@
-import { BrowserWindow, Event, Rectangle, WebContents, WebContentsView, app, nativeTheme, shell } from "electron";
+import {
+    BrowserWindow,
+    Event,
+    Rectangle,
+    WebContents,
+    WebContentsView,
+    app,
+    nativeImage,
+    nativeTheme,
+    shell,
+} from "electron";
 import { debounce } from "lodash";
 import { getWindowBounds, saveWindowBounds } from "../../store/boundsStore";
 import { getSettings, updateSettings } from "../../store/settingsStore";
@@ -40,8 +50,16 @@ import { isWindowValid } from "./windowUtils";
 import { profiler } from "../profiler/profiler";
 import { sentryReport } from "../sentryReport";
 import { isUserNetworkErrorCode, NET_ERROR_CODE } from "../netErrors";
-import { getFileResourcePath } from "../../constants/resources";
+import { getFileResourcePath, getIconResourcePath } from "../../constants/resources";
 import { getCopilotSidecarLayout } from "../../copilot/sidecarLayout";
+import { OrderFilesService, failedAction, successfulAction } from "../../copilot/orderFiles";
+import {
+    ORDER_FILES_BROWSE_CHANNEL,
+    ORDER_FILES_DRAG_CHANNEL,
+    ORDER_FILES_OPEN_CHANNEL,
+    ORDER_FILES_REVEAL_CHANNEL,
+    type OrderFilesBrowseRequest,
+} from "../../copilot/orderFilesContract";
 import pkg from "../../../package.json";
 import { copilotAppURL } from "../../copilot/backendConfig";
 import { appSession } from "../session";
@@ -100,6 +118,7 @@ const saveCopilotSidecarWidth = debounce((width: number) => {
 
 const colorspaceCopilotEnabled = pkg.config.colorspaceCopilot;
 const copilotSidecarURL = copilotAppURL().toString();
+const orderFilesService = new OrderFilesService();
 
 export const IGNORED_NET_ERROR_CODES: number[] = [NET_ERROR_CODE.ABORTED];
 
@@ -306,6 +325,45 @@ const createCopilotSidecarView = () => {
         if (new URL(url).origin !== new URL(copilotSidecarURL).origin) {
             event.preventDefault();
         }
+    });
+    view.webContents.ipc.handle(ORDER_FILES_BROWSE_CHANNEL, (event, request: OrderFilesBrowseRequest) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return {
+                available: false,
+                rootName: "webbestellingen",
+                segments: [],
+                entries: [],
+                resolvedOrder: false,
+                message: "Bestanden kunnen alleen vanuit het Copilot-paneel worden geopend.",
+            };
+        }
+        return orderFilesService.browse(request ?? {});
+    });
+    view.webContents.ipc.handle(ORDER_FILES_OPEN_CHANNEL, async (event, id: unknown) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return failedAction("Dit bestand kan niet vanuit dit venster worden geopend.");
+        }
+        const filePath = orderFilesService.filePathForToken(id);
+        if (!filePath) return failedAction("Het bestand bestaat niet meer of is niet toegankelijk.");
+        const error = await shell.openPath(filePath);
+        return error ? failedAction(error) : successfulAction();
+    });
+    view.webContents.ipc.handle(ORDER_FILES_REVEAL_CHANNEL, (event, id: unknown) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return failedAction("Dit bestand kan niet vanuit dit venster worden getoond.");
+        }
+        const filePath = orderFilesService.filePathForToken(id);
+        if (!filePath) return failedAction("Het bestand bestaat niet meer of is niet toegankelijk.");
+        shell.showItemInFolder(filePath);
+        return successfulAction();
+    });
+    view.webContents.ipc.on(ORDER_FILES_DRAG_CHANNEL, (event, ids: unknown) => {
+        if (event.senderFrame !== view.webContents.mainFrame) return;
+        const files = orderFilesService.pathsForTokens(ids);
+        if (!files.length) return;
+        const icon = nativeImage.createFromPath(getIconResourcePath("colorspace-copilot.png"));
+        if (icon.isEmpty()) return;
+        event.sender.startDrag({ file: files[0], files, icon });
     });
     view.webContents.on("ipc-message", (_event, channel, ...args) => {
         if (channel !== "colorspace-copilot-sidecar-width") return;
