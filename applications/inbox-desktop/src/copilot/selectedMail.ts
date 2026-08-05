@@ -142,7 +142,7 @@ export const normalizeExtractedMail = (
             return [];
         }
         const record = candidate as Record<string, unknown>;
-        const direction = record.direction === "outbound" ? "outbound" : "inbound";
+        const direction: "inbound" | "outbound" = record.direction === "outbound" ? "outbound" : "inbound";
         const bodyText = cleanText(record.bodyText, 20_000);
         if (!bodyText || totalLength >= 80_000) {
             return [];
