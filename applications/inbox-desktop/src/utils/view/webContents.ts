@@ -38,6 +38,7 @@ import { sentryReport } from "../sentryReport";
 import { enableAppSwitcherMenuItems } from "../menus/menuApplication";
 import { openExternalRedirect } from "../openExternal/openExternal";
 import { urlRedirectManager } from "../urlRedirects/manager";
+import { notifyCopilotOfSelectedMail } from "../../copilot/selectedMail";
 
 const RENDERER_LOG_MAX_MESSAGE_LENGTH = 500;
 
@@ -74,6 +75,10 @@ export function handleWebContents(contents: WebContents) {
 
         if (!isCurrentContent()) {
             return;
+        }
+
+        if (getWebContentsViewName(contents) === "mail") {
+            void notifyCopilotOfSelectedMail(url);
         }
 
         // App switch shortcuts should be disabled when the account is present. In some cases we can display
@@ -128,6 +133,10 @@ export function handleWebContents(contents: WebContents) {
 
         if (!isHostAllowed(url)) {
             return ev.preventDefault();
+        }
+
+        if (getWebContentsViewName(contents) === "mail") {
+            void notifyCopilotOfSelectedMail(url);
         }
 
         if (isAccountLogin(url) || isAccountSwitch(url)) {
