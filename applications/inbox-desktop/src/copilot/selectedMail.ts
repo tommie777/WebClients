@@ -21,6 +21,12 @@ export type SelectedMailContent = {
         sentAt?: string;
         bodyText: string;
     }>;
+    relatedConversations: Array<{
+        elementID: string;
+        subject: string;
+        participants: string;
+        sentAt: string;
+    }>;
 };
 
 type ExtractedMailValue = {
@@ -28,6 +34,7 @@ type ExtractedMailValue = {
     senderEmail?: unknown;
     recipientDomain?: unknown;
     messages?: unknown;
+    relatedConversations?: unknown;
 };
 
 type CopilotAction = {
@@ -194,12 +201,30 @@ export const normalizeExtractedMail = (
 
     const senderEmail = cleanEmail(value.senderEmail);
     const recipientDomain = cleanText(value.recipientDomain, 253).toLocaleLowerCase("en-US");
+    const relatedConversations = Array.isArray(value.relatedConversations)
+        ? value.relatedConversations.slice(0, 40).flatMap((candidate) => {
+              if (!candidate || typeof candidate !== "object") return [];
+              const record = candidate as Record<string, unknown>;
+              const elementID = cleanText(record.elementID, 256);
+              const subject = cleanText(record.subject, 500);
+              if (!elementID || !subject || elementID === selection.elementID) return [];
+              return [
+                  {
+                      elementID,
+                      subject,
+                      participants: cleanText(record.participants, 500),
+                      sentAt: cleanText(record.sentAt, 100),
+                  },
+              ];
+          })
+        : [];
     return {
         selection,
         subject: cleanText(value.subject, 500) || "Zonder onderwerp",
         ...(senderEmail ? { senderEmail } : {}),
         ...(/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(recipientDomain) ? { recipientDomain } : {}),
         messages,
+        relatedConversations,
     };
 };
 
@@ -243,11 +268,25 @@ function extractMailInPage(): ExtractedMailValue {
     const ownAddress = messages
         .flatMap((message) => message.addresses || [])
         .find((address) => address !== senderEmail);
+    const relatedConversations = Array.from(
+        document.querySelectorAll('[data-shortcut-target="item-container"][data-element-id]'),
+    ).flatMap((item) => {
+        const elementID = item.getAttribute("data-element-id") || "";
+        const testID = item.getAttribute("data-testid") || "";
+        const subject = testID.startsWith("message-item:") ? testID.slice("message-item:".length) : "";
+        if (!elementID || !subject) return [];
+        const participants = Array.from(item.querySelectorAll('[title*="@"]'))
+            .map((node) => node.getAttribute("title") || "")
+            .join(", ");
+        const sentAt = item.querySelector("time")?.getAttribute("datetime") || "";
+        return [{ elementID, subject, participants, sentAt }];
+    });
     return {
         subject,
         senderEmail,
         recipientDomain: ownAddress?.split("@")[1],
         messages: messages.map(({ addresses, ...message }) => message),
+        relatedConversations,
     };
 }
 

@@ -68,6 +68,7 @@ describe("normalizeExtractedMail", () => {
                     bodyText: "Wij zoeken dit uit.",
                 },
             ],
+            relatedConversations: [],
         });
     });
 
