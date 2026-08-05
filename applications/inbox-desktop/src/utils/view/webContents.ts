@@ -39,8 +39,52 @@ import { enableAppSwitcherMenuItems } from "../menus/menuApplication";
 import { openExternalRedirect } from "../openExternal/openExternal";
 import { urlRedirectManager } from "../urlRedirects/manager";
 import { notifyCopilotOfSelectedMail } from "../../copilot/selectedMail";
+import pkg from "../../../package.json";
 
 const RENDERER_LOG_MAX_MESSAGE_LENGTH = 500;
+
+const ensureExpandedColorspaceMailSidebar = async (contents: WebContents) => {
+    if (!pkg.config.colorspaceCopilot) {
+        return;
+    }
+    try {
+        const changed = (await contents.executeJavaScript(`(() => {
+            let changed = false;
+            for (let index = 0; index < localStorage.length; index += 1) {
+                const key = localStorage.key(index);
+                if (key?.endsWith("-proton-mail-left-nav-opened") && localStorage.getItem(key) !== "true") {
+                    localStorage.setItem(key, "true");
+                    changed = true;
+                }
+            }
+            return changed;
+        })()`)) as boolean;
+        if (changed && !contents.isDestroyed()) {
+            mainLogger.info("Restoring expanded Proton Mail navigation for Colorspace Copilot");
+            contents.reload();
+        }
+    } catch {
+        // The renderer can navigate while the local preference is inspected.
+    }
+};
+
+const syncColorspaceMailBackground = async (contents: WebContents) => {
+    if (!pkg.config.colorspaceCopilot) {
+        return;
+    }
+    try {
+        const color = (await contents.executeJavaScript(`(() => {
+            const styles = getComputedStyle(document.documentElement);
+            return styles.getPropertyValue("--background-norm").trim()
+                || getComputedStyle(document.body).backgroundColor;
+        })()`)) as string;
+        if (color && !contents.isDestroyed()) {
+            getMailView()?.setBackgroundColor(color);
+        }
+    } catch {
+        // The renderer can navigate while its theme is inspected.
+    }
+};
 
 // Report renderer unresponsive once per session per view, as the event can fire repeatedly during a single hang episode.
 const unresponsiveReported = new Set<string>();
@@ -59,6 +103,13 @@ export function handleWebContents(contents: WebContents) {
     const isCurrentContent = () => {
         return getCurrentView()?.webContents === contents;
     };
+
+    contents.on("dom-ready", () => {
+        if (getWebContentsViewName(contents) === "mail") {
+            void ensureExpandedColorspaceMailSidebar(contents);
+            void syncColorspaceMailBackground(contents);
+        }
+    });
 
     contents.on("did-navigate", async (_ev, url) => {
         logger().info("did-navigate", url);

@@ -1,4 +1,4 @@
-import { BrowserWindow, Event, Rectangle, WebContents, WebContentsView, app, nativeTheme } from "electron";
+import { BrowserWindow, Event, Rectangle, WebContents, WebContentsView, app, nativeTheme, shell } from "electron";
 import { debounce } from "lodash";
 import { getWindowBounds, saveWindowBounds } from "../../store/boundsStore";
 import { getSettings, updateSettings } from "../../store/settingsStore";
@@ -41,6 +41,8 @@ import { profiler } from "../profiler/profiler";
 import { sentryReport } from "../sentryReport";
 import { isUserNetworkErrorCode, NET_ERROR_CODE } from "../netErrors";
 import { getFileResourcePath } from "../../constants/resources";
+import { getCopilotSidecarLayout } from "../../copilot/sidecarLayout";
+import pkg from "../../../package.json";
 
 type ViewID = keyof URLConfig;
 
@@ -83,6 +85,13 @@ const viewTitleMap: Record<ViewID, string> = {
 const PRELOADED_VIEWS: ViewID[] = ["mail", "calendar"];
 let mainWindow: BrowserWindow | null = null;
 let loadingView: WebContentsView | null = null;
+let attachedPrimaryView: WebContentsView | null = null;
+let copilotSidecarView: WebContentsView | null = null;
+let copilotSidecarAttached = false;
+let copilotReloadTimer: NodeJS.Timeout | undefined;
+
+const colorspaceCopilotEnabled = pkg.config.colorspaceCopilot;
+const copilotSidecarURL = process.env.COLORSPACE_COPILOT_APP_URL?.trim() || "http://127.0.0.1:3210/?sidecar=1";
 
 export const IGNORED_NET_ERROR_CODES: number[] = [NET_ERROR_CODE.ABORTED];
 
@@ -234,6 +243,9 @@ const createViews = () => {
     viewMap.mail = createView("mail");
     viewMap.calendar = createView("calendar");
     viewMap.account = createView("account");
+    if (colorspaceCopilotEnabled) {
+        copilotSidecarView = createCopilotSidecarView();
+    }
 
     if (isWindows) {
         mainWindow!.setMenuBarVisibility(false);
@@ -247,13 +259,85 @@ const createViews = () => {
         if (!isWindowValid(mainWindow)) {
             return;
         }
-
-        const bounds = mainWindow.getBounds();
-        viewMap.mail?.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
-        viewMap.calendar?.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
-        viewMap.account?.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
-        loadingView?.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
+        updateAttachedViewBounds();
     });
+};
+
+const createCopilotSidecarView = () => {
+    const view = new WebContentsView({
+        webPreferences: {
+            contextIsolation: true,
+            nodeIntegration: false,
+            sandbox: true,
+        },
+    });
+    view.setBackgroundColor("#edf2f4");
+
+    const load = () => {
+        if (!view.webContents.isDestroyed()) {
+            void view.webContents.loadURL(copilotSidecarURL);
+        }
+    };
+    view.webContents.on("did-fail-load", (_event, errorCode, _description, _url, isMainFrame) => {
+        if (!isMainFrame || errorCode === NET_ERROR_CODE.ABORTED) {
+            return;
+        }
+        clearTimeout(copilotReloadTimer);
+        copilotReloadTimer = setTimeout(load, 2_500);
+    });
+    view.webContents.setWindowOpenHandler(({ url }) => {
+        if (/^https:\/\//i.test(url)) {
+            void shell.openExternal(url);
+        }
+        return { action: "deny" };
+    });
+    view.webContents.on("will-navigate", (event, url) => {
+        if (new URL(url).origin !== new URL(copilotSidecarURL).origin) {
+            event.preventDefault();
+        }
+    });
+    load();
+    return view;
+};
+
+const shouldAttachCopilotSidecar = (view: WebContentsView) => {
+    return colorspaceCopilotEnabled && view === viewMap.mail && copilotSidecarView !== null;
+};
+
+const updateAttachedViewBounds = () => {
+    if (!isWindowValid(mainWindow) || !attachedPrimaryView) {
+        return;
+    }
+    const { width, height } = mainWindow.getContentBounds();
+    if (shouldAttachCopilotSidecar(attachedPrimaryView) && copilotSidecarView) {
+        const layout = getCopilotSidecarLayout(width, height);
+        attachedPrimaryView.setBounds(layout.primary);
+        copilotSidecarView.setBounds(layout.sidecar);
+        return;
+    }
+    attachedPrimaryView.setBounds({ x: 0, y: 0, width, height });
+};
+
+const attachPrimaryView = (view: WebContentsView) => {
+    if (!isWindowValid(mainWindow)) {
+        return;
+    }
+    if (attachedPrimaryView && attachedPrimaryView !== view) {
+        mainWindow.contentView.removeChildView(attachedPrimaryView);
+    }
+    if (copilotSidecarAttached && copilotSidecarView) {
+        mainWindow.contentView.removeChildView(copilotSidecarView);
+        copilotSidecarAttached = false;
+    }
+    if (attachedPrimaryView !== view) {
+        mainWindow.contentView.addChildView(view);
+    }
+    attachedPrimaryView = view;
+    if (shouldAttachCopilotSidecar(view) && copilotSidecarView) {
+        mainWindow.contentView.addChildView(copilotSidecarView);
+        copilotSidecarAttached = true;
+    }
+    updateAttachedViewBounds();
 };
 
 const createBrowserWindow = () => {
@@ -278,7 +362,7 @@ function updateViewBounds(view: WebContentsView | undefined, viewID: ViewID | nu
         return;
     }
 
-    const { height: windowHeight, width: windowWidth } = mainWindow.getBounds();
+    const { height: windowHeight, width: windowWidth } = mainWindow.getContentBounds();
     let horizontalMargin = 0;
     let verticalMargin = 0;
 
@@ -303,6 +387,11 @@ function updateViewBounds(view: WebContentsView | undefined, viewID: ViewID | nu
         width: windowWidth - horizontalMargin,
         height: windowHeight - verticalMargin,
     };
+
+    if (view === attachedPrimaryView) {
+        updateAttachedViewBounds();
+        return;
+    }
 
     if (!view) {
         viewLogger(viewID).warn("cannot adjust view bounds, view is null");
@@ -385,21 +474,21 @@ export async function showView(viewID: CHANGE_VIEW_TARGET, url: string = "") {
         viewLogger(viewID).debug(`showView loading mailto ${url} from`, getViewURL(viewID));
         await showLoadingPage(viewTitleMap[viewID]);
         await loadURL(viewID, url);
-        mainWindow!.setContentView(view);
+        attachPrimaryView(view);
     } else if (url && urlHasOpenMailParams(url)) {
         viewLogger(viewID).debug(`showView loading open mail ${url} from`, getViewURL(viewID));
         await showLoadingPage(viewTitleMap[viewID]);
         await loadURL(viewID, url);
-        mainWindow!.setContentView(view);
+        attachPrimaryView(view);
     } else if (url && !isSameURL(url, getViewURL(viewID))) {
         viewLogger(viewID).debug("showView current url is different", getViewURL(viewID));
         viewLogger(viewID).info("showView loading", url);
         await showLoadingPage(viewTitleMap[viewID]);
         await loadURL(viewID, url);
-        mainWindow!.setContentView(view);
+        attachPrimaryView(view);
     } else {
         viewLogger(viewID).info("showView showing view for ", url);
-        mainWindow!.setContentView(view);
+        attachPrimaryView(view);
     }
 
     if (previousViewID === "account") {
@@ -648,7 +737,7 @@ async function showLoadingPage(title: string): Promise<void> {
     loadingView = new WebContentsView(isPlaywrightTest ? getWindowPlaywrightConfig() : getWindowConfig());
     await renderLoadingPage(loadingView, title);
 
-    mainWindow.setContentView(loadingView);
+    attachPrimaryView(loadingView);
 }
 
 async function renderLoadingPage(view: WebContentsView, title: string): Promise<void> {

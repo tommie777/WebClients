@@ -6,20 +6,17 @@ import { appSession } from "../session";
 import { MAIL_APP_NAME } from "@proton/shared/lib/constants";
 import { isProdEnv } from "../isProdEnv";
 import { getIconResourcePath } from "../../constants/resources";
+import { COPILOT_WINDOW_MINIMUM_WIDTH } from "../../copilot/sidecarLayout";
+import pkg from "../../../package.json";
 
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 const getOSSpecificConfig = (): BrowserWindowConstructorOptions => {
     if (isMac) {
         return {
-            frame: false,
-            titleBarStyle: "hidden",
-            vibrancy: "sidebar",
+            titleBarStyle: "hiddenInset",
             trafficLightPosition: { x: 12, y: 18 },
-            transparent: true,
-            webPreferences: {
-                transparent: true,
-            },
+            backgroundColor: "#19171f",
         };
     } else if (isWindows) {
         return {};
@@ -40,7 +37,7 @@ export const getWindowConfig = (): BrowserWindowConstructorOptions => {
         y,
         width,
         height,
-        minWidth: MINIMUM_WIDTH,
+        minWidth: pkg.config.colorspaceCopilot ? COPILOT_WINDOW_MINIMUM_WIDTH : MINIMUM_WIDTH,
         minHeight: MINIMUM_HEIGHT,
         autoHideMenuBar: true,
         show: false,

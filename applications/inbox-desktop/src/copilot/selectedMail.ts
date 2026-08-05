@@ -1,4 +1,4 @@
-import type { WebContents } from "electron";
+import { clipboard, type WebContents } from "electron";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -251,50 +251,62 @@ function extractMailInPage(): ExtractedMailValue {
     };
 }
 
-function insertDraftInPage(draft: string): boolean {
-    const composers = Array.from(document.querySelectorAll('[data-testid^="composer-"]')).filter((node) =>
-        node.querySelector('[data-testid="composer-content"]'),
-    );
-    const composer = composers.at(-1);
-    if (!composer) {
-        return false;
-    }
-
-    const textarea = composer.querySelector('[data-testid="editor-textarea"]');
+function focusDraftEditorInPage(): boolean {
+    // Composer ids and wrappers vary between Proton web releases. Resolve the
+    // last visible editor itself instead of depending on a generated frame id.
+    const textarea = Array.from(document.querySelectorAll('[data-testid="editor-textarea"]'))
+        .filter((node) => node.getClientRects().length > 0)
+        .at(-1);
     if (textarea instanceof HTMLTextAreaElement) {
-        const existing = textarea.value.trim();
-        const next = existing ? draft + "\n\n" + textarea.value : draft;
-        const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
-        setter?.call(textarea, next);
-        textarea.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: draft }));
         textarea.focus();
-        textarea.setSelectionRange(draft.length, draft.length);
+        textarea.setSelectionRange(0, 0);
         return true;
     }
 
-    const frame = composer.querySelector('[data-testid="rooster-iframe"]');
+    const frame = Array.from(document.querySelectorAll("iframe"))
+        .filter((candidate) => candidate.getClientRects().length > 0)
+        .filter((candidate) => {
+            try {
+                return Boolean(
+                    candidate.contentDocument?.querySelector('[contenteditable]:not([contenteditable="false"])'),
+                );
+            } catch {
+                return false;
+            }
+        })
+        .at(-1);
     if (!(frame instanceof HTMLIFrameElement)) {
         return false;
     }
-    const editor = frame.contentDocument?.getElementById("rooster-editor");
+    const editor = frame.contentDocument?.querySelector('[contenteditable]:not([contenteditable="false"])');
     if (!(editor instanceof HTMLElement) || !frame.contentDocument) {
         return false;
     }
-    const fragment = frame.contentDocument.createDocumentFragment();
-    draft.split(/\n/).forEach((line) => {
-        const row = frame.contentDocument!.createElement("div");
-        row.textContent = line || "\u00a0";
-        fragment.append(row);
-    });
-    if (editor.textContent?.trim()) {
-        fragment.append(frame.contentDocument.createElement("br"));
-        editor.prepend(fragment);
-    } else {
-        editor.replaceChildren(fragment);
-    }
-    editor.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: draft }));
     editor.focus();
+    const selection = frame.contentWindow?.getSelection();
+    const range = frame.contentDocument.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(true);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
     return true;
+}
+
+function draftPresentInPage(sample: string): boolean {
+    const textarea = Array.from(document.querySelectorAll('[data-testid="editor-textarea"]'))
+        .filter((node) => node.getClientRects().length > 0)
+        .at(-1);
+    if (textarea instanceof HTMLTextAreaElement) {
+        return textarea.value.includes(sample);
+    }
+    return Array.from(document.querySelectorAll("iframe")).some((frame) => {
+        try {
+            const editor = frame.contentDocument?.querySelector('[contenteditable]:not([contenteditable="false"])');
+            return editor?.textContent?.includes(sample) ?? false;
+        } catch {
+            return false;
+        }
+    });
 }
 
 function clickReplyInPage(): boolean {
@@ -386,6 +398,7 @@ const pollForCopilotAction = async (
     generation: number,
 ): Promise<void> => {
     const actionEndpoint = new URL("./action", endpoint);
+    const actionsWithReplyOpened = new Set<string>();
     for (let attempt = 0; attempt < 150 && generation === activeSelectionGeneration; attempt += 1) {
         await wait(2_000);
         try {
@@ -402,13 +415,41 @@ const pollForCopilotAction = async (
                 continue;
             }
 
-            let inserted = await executePageFunction<boolean, [string]>(contents, insertDraftInPage, action.draft);
-            if (!inserted) {
+            // The action originates in the Copilot WebContentsView, so return
+            // keyboard focus to Proton before targeting its nested editor.
+            contents.focus();
+            await wait(50);
+            let editorReady = await executePageFunction<boolean>(contents, focusDraftEditorInPage);
+            if (!editorReady && !actionsWithReplyOpened.has(action.id)) {
+                actionsWithReplyOpened.add(action.id);
                 await executePageFunction<boolean>(contents, clickReplyInPage);
-                for (let composerAttempt = 0; composerAttempt < 12 && !inserted; composerAttempt += 1) {
+                for (let composerAttempt = 0; composerAttempt < 12 && !editorReady; composerAttempt += 1) {
                     await wait(250);
-                    inserted = await executePageFunction<boolean, [string]>(contents, insertDraftInPage, action.draft);
+                    editorReady = await executePageFunction<boolean>(contents, focusDraftEditorInPage);
                 }
+            }
+            if (!editorReady) {
+                continue;
+            }
+            // Use Chromium's native text-input path so Proton's rich-text
+            // editor receives the same editing events as keyboard input.
+            await contents.insertText(action.draft + "\n\n");
+            await wait(150);
+            let inserted = await executePageFunction<boolean, [string]>(
+                contents,
+                draftPresentInPage,
+                action.draft.slice(0, 80),
+            );
+            if (!inserted) {
+                await executePageFunction<boolean>(contents, focusDraftEditorInPage);
+                clipboard.writeText(action.draft + "\n\n");
+                contents.paste();
+                await wait(150);
+                inserted = await executePageFunction<boolean, [string]>(
+                    contents,
+                    draftPresentInPage,
+                    action.draft.slice(0, 80),
+                );
             }
             if (!inserted) {
                 continue;
