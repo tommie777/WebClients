@@ -2,6 +2,7 @@ import type { WebContents } from "electron";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { mainLogger } from "../utils/log";
 
 export type SelectedMail = {
     labelID: string;
@@ -445,7 +446,11 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
             redirect: "error",
             signal: AbortSignal.timeout(1_500),
         });
-        if (!response.ok || !contents || generation !== activeSelectionGeneration) {
+        if (!response.ok) {
+            mainLogger.warn("Local Copilot selection metadata returned HTTP", response.status);
+            return;
+        }
+        if (!contents || generation !== activeSelectionGeneration) {
             return;
         }
 
@@ -474,6 +479,8 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
         });
         if (contentResponse.ok && generation === activeSelectionGeneration) {
             void pollForCopilotAction(endpoint, token, contents, selection, generation);
+        } else if (!contentResponse.ok) {
+            mainLogger.warn("Local Copilot mail content returned HTTP", contentResponse.status);
         }
     } catch {
         // The local copilot helper is optional and must never interrupt mail.
