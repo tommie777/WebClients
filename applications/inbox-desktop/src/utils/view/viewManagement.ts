@@ -44,6 +44,8 @@ import { getFileResourcePath } from "../../constants/resources";
 import { getCopilotSidecarLayout } from "../../copilot/sidecarLayout";
 import pkg from "../../../package.json";
 
+declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+
 type ViewID = keyof URLConfig;
 
 let currentViewID: ViewID;
@@ -89,6 +91,10 @@ let attachedPrimaryView: WebContentsView | null = null;
 let copilotSidecarView: WebContentsView | null = null;
 let copilotSidecarAttached = false;
 let copilotReloadTimer: NodeJS.Timeout | undefined;
+let copilotSidecarWidth: number | undefined;
+const saveCopilotSidecarWidth = debounce((width: number) => {
+    updateSettings({ colorspaceCopilotSidecarWidth: width });
+}, 300);
 
 const colorspaceCopilotEnabled = pkg.config.colorspaceCopilot;
 const copilotSidecarURL = process.env.COLORSPACE_COPILOT_APP_URL?.trim() || "http://127.0.0.1:3210/?sidecar=1";
@@ -264,11 +270,13 @@ const createViews = () => {
 };
 
 const createCopilotSidecarView = () => {
+    copilotSidecarWidth = getSettings().colorspaceCopilotSidecarWidth;
     const view = new WebContentsView({
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
+            preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
         },
     });
     view.setBackgroundColor("#edf2f4");
@@ -296,6 +304,16 @@ const createCopilotSidecarView = () => {
             event.preventDefault();
         }
     });
+    view.webContents.on("ipc-message", (_event, channel, ...args) => {
+        if (channel !== "colorspace-copilot-sidecar-width") return;
+        const requestedWidth = Number(args[0]);
+        if (!Number.isFinite(requestedWidth)) return;
+        const bounds = mainWindow?.getContentBounds();
+        if (!bounds) return;
+        copilotSidecarWidth = getCopilotSidecarLayout(bounds.width, bounds.height, requestedWidth).sidecar.width;
+        saveCopilotSidecarWidth(copilotSidecarWidth);
+        updateAttachedViewBounds();
+    });
     load();
     return view;
 };
@@ -310,7 +328,7 @@ const updateAttachedViewBounds = () => {
     }
     const { width, height } = mainWindow.getContentBounds();
     if (shouldAttachCopilotSidecar(attachedPrimaryView) && copilotSidecarView) {
-        const layout = getCopilotSidecarLayout(width, height);
+        const layout = getCopilotSidecarLayout(width, height, copilotSidecarWidth);
         attachedPrimaryView.setBounds(layout.primary);
         copilotSidecarView.setBounds(layout.sidecar);
         return;

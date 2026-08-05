@@ -39,6 +39,7 @@ import { enableAppSwitcherMenuItems } from "../menus/menuApplication";
 import { openExternalRedirect } from "../openExternal/openExternal";
 import { urlRedirectManager } from "../urlRedirects/manager";
 import { notifyCopilotOfSelectedMail } from "../../copilot/selectedMail";
+import { installMailSidebarResize } from "../../copilot/mailSidebarResize";
 import pkg from "../../../package.json";
 
 const RENDERER_LOG_MAX_MESSAGE_LENGTH = 500;
@@ -108,6 +109,9 @@ export function handleWebContents(contents: WebContents) {
         if (getWebContentsViewName(contents) === "mail") {
             void ensureExpandedColorspaceMailSidebar(contents);
             void syncColorspaceMailBackground(contents);
+            if (pkg.config.colorspaceCopilot) {
+                void installMailSidebarResize(contents);
+            }
         }
     });
 
