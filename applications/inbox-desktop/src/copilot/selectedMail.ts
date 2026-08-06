@@ -437,6 +437,61 @@ function clickReplyInPage(): boolean {
     return false;
 }
 
+function installReplyInitiationObserverInPage(selectionElementID: string): boolean {
+    const root = document.documentElement;
+    root.dataset.colorspaceCopilotSelection = selectionElementID;
+    root.dataset.colorspaceCopilotReplyInitiated = "false";
+    root.dataset.colorspaceCopilotBaselineReplyComposers = JSON.stringify(
+        Array.from(
+            document.querySelectorAll<HTMLElement>(
+                "section.composer:not(.composer--is-minimized):not(.composer--is-blur)",
+            ),
+        )
+            .filter((node) => node.getClientRects().length > 0)
+            .map((node, index) => {
+                const subject = node.querySelector<HTMLInputElement>('[data-testid="composer:subject"]')?.value || "";
+                return `${node.getAttribute("data-testid") || index}:${subject}`;
+            }),
+    );
+    if (root.dataset.colorspaceCopilotReplyObserverInstalled === "true") return true;
+
+    document.addEventListener(
+        "click",
+        (event) => {
+            const target =
+                event.target instanceof Element
+                    ? event.target.closest('[data-testid="message-view:reply"], [data-testid="message-view:reply-all"]')
+                    : null;
+            if (target) document.documentElement.dataset.colorspaceCopilotReplyInitiated = "true";
+        },
+        true,
+    );
+    root.dataset.colorspaceCopilotReplyObserverInstalled = "true";
+    return true;
+}
+
+function replyInitiatedInPage(selectionElementID: string): boolean {
+    const root = document.documentElement;
+    if (root.dataset.colorspaceCopilotSelection !== selectionElementID) return false;
+    if (root.dataset.colorspaceCopilotReplyInitiated === "true") return true;
+
+    let baseline: string[] = [];
+    try {
+        baseline = JSON.parse(root.dataset.colorspaceCopilotBaselineReplyComposers || "[]") as string[];
+    } catch {
+        baseline = [];
+    }
+    return Array.from(
+        document.querySelectorAll<HTMLElement>("section.composer:not(.composer--is-minimized):not(.composer--is-blur)"),
+    )
+        .filter((node) => node.getClientRects().length > 0)
+        .some((node, index) => {
+            const subject = node.querySelector<HTMLInputElement>('[data-testid="composer:subject"]')?.value || "";
+            const signature = `${node.getAttribute("data-testid") || index}:${subject}`;
+            return /^\s*re\s*:/i.test(subject) && !baseline.includes(signature);
+        });
+}
+
 function clickConversationInPage(elementID: string): boolean {
     const items = Array.from(document.querySelectorAll<HTMLElement>('[data-element-id]'));
     const target = items.find((item) => item.getAttribute("data-element-id") === elementID);
@@ -597,13 +652,42 @@ const pollForCopilotAction = async (
     endpoint: URL,
     contents: WebContents,
     selection: SelectedMail,
+    mail: SelectedMailContent,
     generation: number,
 ): Promise<void> => {
     const actionEndpoint = new URL("./action", endpoint);
     const actionsWithReplyOpened = new Set<string>();
+    let generationRequested = false;
     for (let attempt = 0; attempt < 150 && generation === activeSelectionGeneration; attempt += 1) {
         await wait(2_000);
         try {
+            if (!generationRequested) {
+                generationRequested = await executePageFunction<boolean, [string]>(
+                    contents,
+                    replyInitiatedInPage,
+                    selection.elementID,
+                );
+                if (generationRequested) {
+                    const generationResponse = await fetch(endpoint, {
+                        method: "POST",
+                        headers: copilotRequestHeaders(true),
+                        body: JSON.stringify({
+                            type: "proton-mail-selection",
+                            version: 1,
+                            selection,
+                            mail,
+                            generateDraft: true,
+                        }),
+                        redirect: "error",
+                        signal: AbortSignal.timeout(3_000),
+                    });
+                    if (!generationResponse.ok) {
+                        generationRequested = false;
+                        mainLogger.warn("Mail Copilot reply trigger returned HTTP", generationResponse.status);
+                    }
+                }
+            }
+
             const response = await fetch(actionEndpoint, {
                 headers: copilotRequestHeaders(),
                 redirect: "error",
@@ -718,6 +802,12 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
             return;
         }
 
+        await executePageFunction<boolean, [string]>(
+            contents,
+            installReplyInitiationObserverInPage,
+            selection.elementID,
+        );
+
         const token = copilotBridgeToken();
         if (!token) {
             return;
@@ -741,7 +831,7 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
         if (contentResponse.ok && generation === activeSelectionGeneration) {
             lastSubmittedMailFingerprint = mailFingerprint(mail);
             lastSubmittedSelectionKey = key;
-            void pollForCopilotAction(endpoint, contents, selection, generation);
+            void pollForCopilotAction(endpoint, contents, selection, mail, generation);
         } else if (!contentResponse.ok) {
             const details = await contentResponse.json().catch(() => null);
             mainLogger.warn("Mail Copilot mail content returned HTTP", contentResponse.status, details);
