@@ -28,6 +28,7 @@ export type SelectedMailContent = {
 };
 
 type ExtractedMailValue = {
+    complete?: unknown;
     subject?: unknown;
     senderEmail?: unknown;
     recipientDomain?: unknown;
@@ -142,7 +143,7 @@ export const normalizeExtractedMail = (
     value: ExtractedMailValue,
     selection: SelectedMail,
 ): SelectedMailContent | null => {
-    if (!Array.isArray(value.messages)) {
+    if (value.complete === false || !Array.isArray(value.messages)) {
         return null;
     }
 
@@ -206,10 +207,14 @@ export const normalizeExtractedMail = (
 function extractMailInPage(): ExtractedMailValue {
     const subjectNode = document.querySelector('[data-testid="conversation-header:subject"]');
     const subject = subjectNode?.getAttribute("title") || subjectNode?.textContent || "";
-    const containers = Array.from(
-        document.querySelectorAll('[data-shortcut-target="message-container"][data-expanded="true"]'),
-    );
+    const containers = Array.from(document.querySelectorAll('[data-shortcut-target="message-container"]'));
+    const collapsed = containers.filter((container) => container.getAttribute("data-expanded") !== "true");
+    for (const container of collapsed) {
+        const header = container.querySelector('[data-testid^="message-header-collapsed:"]');
+        if (header instanceof HTMLElement) header.click();
+    }
     const messages = containers.flatMap((container) => {
+        if (container.getAttribute("data-expanded") !== "true") return [];
         const header = container.querySelector(".message-header-expanded");
         const direction = header?.classList.contains("is-outbound") ? "outbound" : "inbound";
         const bodyHost = container.querySelector('[data-testid="message-content:body"]');
@@ -227,7 +232,10 @@ function extractMailInPage(): ExtractedMailValue {
         const addresses = addressNodes
             .map((node) => node.getAttribute("title") || "")
             .filter((address) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address));
-        const sentAt = header?.querySelector('[data-testid="message:message-header-metas"]')?.textContent || "";
+        const sentAt =
+            header?.querySelector("time")?.getAttribute("datetime") ||
+            header?.querySelector('[data-testid="message:message-header-metas"]')?.textContent ||
+            "";
         return [
             {
                 id: container.getAttribute("data-message-id") || undefined,
@@ -257,6 +265,7 @@ function extractMailInPage(): ExtractedMailValue {
         return [{ elementID, subject, participants, sentAt }];
     });
     return {
+        complete: collapsed.length === 0,
         subject,
         senderEmail,
         recipientDomain: ownAddress?.split("@")[1],

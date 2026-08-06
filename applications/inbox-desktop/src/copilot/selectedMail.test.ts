@@ -82,6 +82,18 @@ describe("normalizeExtractedMail", () => {
         ).toBeNull();
     });
 
+    it("waits until every message in the conversation is expanded", () => {
+        expect(
+            normalizeExtractedMail(
+                {
+                    complete: false,
+                    messages: [{ direction: "inbound", bodyText: "Slechts één al geopend bericht." }],
+                },
+                selection,
+            ),
+        ).toBeNull();
+    });
+
     it("keeps related conversation metadata for the Copilot sidecar", () => {
         const result = normalizeExtractedMail(
             {
@@ -89,15 +101,30 @@ describe("normalizeExtractedMail", () => {
                 senderEmail: "klant@example.nl",
                 messages: [{ direction: "inbound", bodyText: "Zie mijn andere mail." }],
                 relatedConversations: [
-                    { elementID: "conversation-related", subject: "Bestanden", participants: "klant@example.nl", sentAt: "vandaag" },
-                    { elementID: selection.elementID, subject: "Huidige mail", participants: "klant@example.nl", sentAt: "vandaag" },
+                    {
+                        elementID: "conversation-related",
+                        subject: "Bestanden",
+                        participants: "klant@example.nl",
+                        sentAt: "vandaag",
+                    },
+                    {
+                        elementID: selection.elementID,
+                        subject: "Huidige mail",
+                        participants: "klant@example.nl",
+                        sentAt: "vandaag",
+                    },
                 ],
             },
             selection,
         );
 
         expect(result?.relatedConversations).toEqual([
-            { elementID: "conversation-related", subject: "Bestanden", participants: "klant@example.nl", sentAt: "vandaag" },
+            {
+                elementID: "conversation-related",
+                subject: "Bestanden",
+                participants: "klant@example.nl",
+                sentAt: "vandaag",
+            },
         ]);
     });
 });

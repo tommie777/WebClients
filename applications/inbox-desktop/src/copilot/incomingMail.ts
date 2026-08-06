@@ -21,6 +21,7 @@ type PendingIncomingMail = {
 type QueueStore = { pendingIncomingMail?: PendingIncomingMail[] };
 
 type ExtractedIncomingMail = {
+    complete?: unknown;
     subject?: unknown;
     senderEmail?: unknown;
     messages?: unknown;
@@ -70,10 +71,14 @@ const cleanEmail = (value: unknown): string => {
 function extractIncomingMailInPage(): ExtractedIncomingMail {
     const subjectNode = document.querySelector('[data-testid="conversation-header:subject"]');
     const subject = subjectNode?.getAttribute("title") || subjectNode?.textContent || "";
-    const containers = Array.from(
-        document.querySelectorAll('[data-shortcut-target="message-container"][data-expanded="true"]'),
-    );
+    const containers = Array.from(document.querySelectorAll('[data-shortcut-target="message-container"]'));
+    const collapsed = containers.filter((container) => container.getAttribute("data-expanded") !== "true");
+    for (const container of collapsed) {
+        const header = container.querySelector('[data-testid^="message-header-collapsed:"]');
+        if (header instanceof HTMLElement) header.click();
+    }
     const messages = containers.flatMap((container) => {
+        if (container.getAttribute("data-expanded") !== "true") return [];
         const header = container.querySelector(".message-header-expanded");
         const direction = header?.classList.contains("is-outbound") ? "outbound" : "inbound";
         const bodyHost = container.querySelector('[data-testid="message-content:body"]');
@@ -92,6 +97,7 @@ function extractIncomingMailInPage(): ExtractedIncomingMail {
             {
                 id: container.getAttribute("data-message-id") || undefined,
                 direction,
+                sentAt: header?.querySelector("time")?.getAttribute("datetime") || undefined,
                 bodyText,
                 addresses,
             },
@@ -99,6 +105,7 @@ function extractIncomingMailInPage(): ExtractedIncomingMail {
     });
     const latestInbound = [...messages].reverse().find((message) => message.direction === "inbound");
     return {
+        complete: collapsed.length === 0,
         subject,
         senderEmail: latestInbound?.addresses?.[0],
         messages: messages.map(({ addresses, ...message }) => message),
@@ -114,7 +121,7 @@ const normalizeIncomingMail = (
     value: ExtractedIncomingMail,
     pending: PendingIncomingMail,
 ): NormalizedIncomingMail | null => {
-    if (!Array.isArray(value.messages)) return null;
+    if (value.complete === false || !Array.isArray(value.messages)) return null;
     const messages = value.messages.slice(-20).flatMap((candidate) => {
         if (!candidate || typeof candidate !== "object") return [];
         const record = candidate as Record<string, unknown>;
@@ -126,7 +133,7 @@ const normalizeIncomingMail = (
             {
                 ...(id ? { id } : {}),
                 direction,
-                sentAt: pending.receivedAt,
+                sentAt: cleanText(record.sentAt, 100) || pending.receivedAt,
                 bodyText,
             },
         ];
