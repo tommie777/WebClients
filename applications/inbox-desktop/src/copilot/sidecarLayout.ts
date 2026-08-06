@@ -38,16 +38,16 @@ export const getCopilotSidecarLayout = (
         width: sidecarWidth,
         height: Math.max(1, safeHeight - verticalInset * 2),
     };
-    const shadowSpread = 4;
+    const edgeSpread = 2;
 
     return {
         primary: { x: 0, y: 0, width: primaryWidth, height: safeHeight },
         divider: { x: primaryWidth, y: 0, width: dividerWidth, height: safeHeight },
         backdrop: {
-            x: sidecar.x - shadowSpread,
+            x: sidecar.x - edgeSpread,
             y: sidecar.y - 2,
-            width: sidecar.width + shadowSpread * 2,
-            height: sidecar.height + 6,
+            width: sidecar.width + edgeSpread * 2,
+            height: sidecar.height + edgeSpread * 2,
         },
         sidecar,
     };
