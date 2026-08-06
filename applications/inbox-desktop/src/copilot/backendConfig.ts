@@ -78,6 +78,12 @@ export const copilotSelectionEndpoint = (): URL | null => {
     return safeCopilotURL(configured, "/api/proton/selection");
 };
 
+export const copilotBackgroundIndexEndpoint = (): URL | null => {
+    const selectionEndpoint = copilotSelectionEndpoint();
+    if (!selectionEndpoint) return null;
+    return safeCopilotURL(new URL("/api/proton/index", selectionEndpoint).toString(), "/api/proton/index");
+};
+
 export const copilotAppURL = (): URL => {
     const configured =
         process.env.COLORSPACE_COPILOT_APP_URL?.trim() ||

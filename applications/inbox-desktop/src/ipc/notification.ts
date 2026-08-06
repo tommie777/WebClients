@@ -13,6 +13,7 @@ import { parseURLParams } from "../utils/urls/urlHelpers";
 import { DEEPLINK_PROTOCOL, DeepLinkActions } from "../utils/protocol/deep_links";
 import { isWindowValid } from "../utils/view/windowUtils";
 import { getFileResourcePath } from "../constants/resources";
+import { queueIncomingMailForCopilot } from "../copilot/incomingMail";
 
 const notifications: Map<string, Notification> = new Map();
 
@@ -181,6 +182,7 @@ const filterSenisitve = (payload: ElectronNotification): string =>
 export const showNotification = (payload: ElectronNotification) => {
     const uuid: string = crypto.randomUUID();
     const localID = getCurrentLocalID();
+    queueIncomingMailForCopilot(payload, localID);
     notificationLogger.debug(`Notification request received ${uuid}, ${localID}:`, filterSenisitve(payload));
 
     const { title, body, app, labelID, elementID, messageID } = payload;
