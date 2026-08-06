@@ -2,6 +2,7 @@ import {
     BrowserWindow,
     Event,
     Rectangle,
+    View,
     WebContents,
     WebContentsView,
     app,
@@ -109,6 +110,7 @@ let mainWindow: BrowserWindow | null = null;
 let loadingView: WebContentsView | null = null;
 let attachedPrimaryView: WebContentsView | null = null;
 let copilotSidecarView: WebContentsView | null = null;
+let copilotSidecarBackdropView: View | null = null;
 let copilotSidecarAttached = false;
 let copilotReloadTimer: NodeJS.Timeout | undefined;
 let copilotSidecarWidth: number | undefined;
@@ -302,6 +304,10 @@ const createCopilotSidecarView = () => {
         },
     });
     view.setBackgroundColor("#edf2f4");
+    view.setBorderRadius(22);
+    copilotSidecarBackdropView = new View();
+    copilotSidecarBackdropView.setBackgroundColor("rgba(24, 49, 58, 0.18)");
+    copilotSidecarBackdropView.setBorderRadius(25);
 
     const load = () => {
         if (!view.webContents.isDestroyed()) {
@@ -391,6 +397,7 @@ const updateAttachedViewBounds = () => {
     if (shouldAttachCopilotSidecar(attachedPrimaryView) && copilotSidecarView) {
         const layout = getCopilotSidecarLayout(width, height, copilotSidecarWidth);
         attachedPrimaryView.setBounds(layout.primary);
+        copilotSidecarBackdropView?.setBounds(layout.backdrop);
         copilotSidecarView.setBounds(layout.sidecar);
         return;
     }
@@ -406,6 +413,9 @@ const attachPrimaryView = (view: WebContentsView) => {
     }
     if (copilotSidecarAttached && copilotSidecarView) {
         mainWindow.contentView.removeChildView(copilotSidecarView);
+        if (copilotSidecarBackdropView) {
+            mainWindow.contentView.removeChildView(copilotSidecarBackdropView);
+        }
         copilotSidecarAttached = false;
     }
     if (attachedPrimaryView !== view) {
@@ -413,6 +423,9 @@ const attachPrimaryView = (view: WebContentsView) => {
     }
     attachedPrimaryView = view;
     if (shouldAttachCopilotSidecar(view) && copilotSidecarView) {
+        if (copilotSidecarBackdropView) {
+            mainWindow.contentView.addChildView(copilotSidecarBackdropView);
+        }
         mainWindow.contentView.addChildView(copilotSidecarView);
         copilotSidecarAttached = true;
     }
