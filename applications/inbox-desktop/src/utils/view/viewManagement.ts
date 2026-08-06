@@ -306,8 +306,8 @@ const createCopilotSidecarView = () => {
     view.setBackgroundColor("#edf2f4");
     view.setBorderRadius(22);
     copilotSidecarBackdropView = new View();
-    copilotSidecarBackdropView.setBackgroundColor("#dbe6e8");
-    copilotSidecarBackdropView.setBorderRadius(24);
+    copilotSidecarBackdropView.setBackgroundColor("rgba(24, 49, 58, 0.18)");
+    copilotSidecarBackdropView.setBorderRadius(25);
 
     const load = () => {
         if (!view.webContents.isDestroyed()) {

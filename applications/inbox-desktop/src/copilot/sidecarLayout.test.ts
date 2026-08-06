@@ -17,7 +17,7 @@ describe("getCopilotSidecarLayout", () => {
 
         expect(layout.sidecar).toEqual({ x: 1434, y: 15, width: 748, height: 1070 });
         expect(layout.divider).toEqual({ x: 1421, y: 0, width: 13, height: 1100 });
-        expect(layout.backdrop).toEqual({ x: 1432, y: 13, width: 752, height: 1074 });
+        expect(layout.backdrop).toEqual({ x: 1430, y: 13, width: 756, height: 1076 });
     });
 
     it("honors a preferred width while protecting Proton's workspace", () => {
