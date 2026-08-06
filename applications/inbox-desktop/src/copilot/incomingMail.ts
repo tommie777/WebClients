@@ -105,7 +105,7 @@ function extractIncomingMailInPage(): ExtractedIncomingMail {
     });
     const latestInbound = [...messages].reverse().find((message) => message.direction === "inbound");
     return {
-        complete: collapsed.length === 0,
+        complete: collapsed.length === 0 && messages.length === containers.length,
         subject,
         senderEmail: latestInbound?.addresses?.[0],
         messages: messages.map(({ addresses, ...message }) => message),

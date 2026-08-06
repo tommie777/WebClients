@@ -265,7 +265,7 @@ function extractMailInPage(): ExtractedMailValue {
         return [{ elementID, subject, participants, sentAt }];
     });
     return {
-        complete: collapsed.length === 0,
+        complete: collapsed.length === 0 && messages.length === containers.length,
         subject,
         senderEmail,
         recipientDomain: ownAddress?.split("@")[1],
