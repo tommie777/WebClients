@@ -8,12 +8,19 @@ import {
 import Logger from "electron-log";
 import { disableMouseNavigation } from "@proton/shared/lib/desktop/disableMouseNavigation";
 import {
+    ORDER_FILES_ATTACH_CHANNEL,
     ORDER_FILES_BROWSE_CHANNEL,
     ORDER_FILES_DRAG_CHANNEL,
     ORDER_FILES_OPEN_CHANNEL,
     ORDER_FILES_REVEAL_CHANNEL,
+    ORDER_FILES_SAVE_MAIL_ATTACHMENTS_CHANNEL,
     type OrderFilesBrowseRequest,
 } from "./copilot/orderFilesContract";
+import {
+    MAIL_SEARCH_ENABLE_CHANNEL,
+    MAIL_SEARCH_OPEN_CHANNEL,
+    MAIL_SEARCH_STATUS_CHANNEL,
+} from "./copilot/mailSearchContract";
 
 const preloadLogger = Logger.scope("preload");
 const isColorspaceCopilotSidecar = new URLSearchParams(window.location.search).has("sidecar");
@@ -73,6 +80,15 @@ if (isColorspaceCopilotSidecar) {
         open: (id: string) => ipcRenderer.invoke(ORDER_FILES_OPEN_CHANNEL, id),
         reveal: (id: string) => ipcRenderer.invoke(ORDER_FILES_REVEAL_CHANNEL, id),
         startDrag: (ids: string[]) => ipcRenderer.send(ORDER_FILES_DRAG_CHANNEL, ids),
+        attach: (ids: string[]) => ipcRenderer.invoke(ORDER_FILES_ATTACH_CHANNEL, ids),
+        saveSelectedMailAttachments: (request: OrderFilesBrowseRequest) =>
+            ipcRenderer.invoke(ORDER_FILES_SAVE_MAIL_ATTACHMENTS_CHANNEL, request),
+    });
+
+    contextBridge.exposeInMainWorld("colorspaceMailSearch", {
+        status: () => ipcRenderer.invoke(MAIL_SEARCH_STATUS_CHANNEL),
+        search: (orderNumber: string) => ipcRenderer.invoke(MAIL_SEARCH_OPEN_CHANNEL, orderNumber),
+        enable: () => ipcRenderer.invoke(MAIL_SEARCH_ENABLE_CHANNEL),
     });
 }
 

@@ -1,4 +1,4 @@
-import { clipboard, webContents as electronWebContents, type WebContents } from "electron";
+import { clipboard, net, webContents as electronWebContents, type WebContents } from "electron";
 import { mainLogger } from "../utils/log";
 import { copilotBridgeToken, copilotRequestHeaders, copilotSelectionEndpoint } from "./backendConfig";
 
@@ -688,7 +688,7 @@ const pollForCopilotAction = async (
                 }
             }
 
-            const response = await fetch(actionEndpoint, {
+            const response = await net.fetch(actionEndpoint.toString(), {
                 headers: copilotRequestHeaders(),
                 redirect: "error",
                 signal: AbortSignal.timeout(1_500),
@@ -711,7 +711,7 @@ const pollForCopilotAction = async (
                     mainLogger.warn("Mail Copilot could not open the related Proton conversation");
                     continue;
                 }
-                await fetch(actionEndpoint, {
+                await net.fetch(actionEndpoint.toString(), {
                     method: "POST",
                     headers: copilotRequestHeaders(true),
                     body: JSON.stringify({ id: action.id }),
@@ -749,7 +749,7 @@ const pollForCopilotAction = async (
                 mainLogger.warn("Mail Copilot could not verify inserted reply text");
                 continue;
             }
-            await fetch(actionEndpoint, {
+            await net.fetch(actionEndpoint.toString(), {
                 method: "POST",
                 headers: copilotRequestHeaders(true),
                 body: JSON.stringify({ id: action.id }),
@@ -783,7 +783,7 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
     const generation = ++activeSelectionGeneration;
 
     try {
-        const response = await fetch(endpoint, {
+        const response = await net.fetch(endpoint.toString(), {
             method: "POST",
             headers: copilotRequestHeaders(true),
             body: JSON.stringify({
@@ -816,7 +816,7 @@ export const notifyCopilotOfSelectedMail = async (rawURL: string, contents?: Web
         if (!mail || generation !== activeSelectionGeneration) {
             return;
         }
-        const contentResponse = await fetch(endpoint, {
+        const contentResponse = await net.fetch(endpoint.toString(), {
             method: "POST",
             headers: copilotRequestHeaders(true),
             body: JSON.stringify({

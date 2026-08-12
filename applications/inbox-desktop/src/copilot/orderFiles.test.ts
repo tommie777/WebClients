@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -66,5 +66,57 @@ describe("OrderFilesService", () => {
 
         expect(result.entries).toEqual([]);
         expect(result.message).toContain("veilig");
+    });
+
+    it("returns a writable directory only for a resolved order", async () => {
+        const root = createRoot();
+        const orderDirectory = join(root, "2026", "augustus", "0088653");
+        mkdirSync(orderDirectory, { recursive: true });
+        const service = new OrderFilesService(root);
+
+        await expect(service.writableOrderDirectory({ orderNumber: "0088653", orderDate: "05-08-2026" })).resolves.toBe(
+            realpathSync(orderDirectory),
+        );
+        await expect(
+            service.writableOrderDirectory({ orderNumber: "0088654", orderDate: "05-08-2026" }),
+        ).resolves.toBeNull();
+    });
+
+    it("keeps every token from the latest large directory listing usable", async () => {
+        const root = createRoot();
+        const orderDirectory = join(root, "2026", "augustus", "0088653");
+        mkdirSync(orderDirectory, { recursive: true });
+        for (let index = 0; index < 500; index += 1) {
+            writeFileSync(join(orderDirectory, `bestand-${index}.pdf`), "pdf");
+        }
+        const service = new OrderFilesService(root);
+        let result = await service.browse({ segments: ["2026", "augustus", "0088653"] });
+        for (let iteration = 0; iteration < 4; iteration += 1) {
+            result = await service.browse({ segments: ["2026", "augustus", "0088653"] });
+        }
+
+        const tokens = result.entries.flatMap((entry) => (entry.id ? [entry.id] : []));
+        expect(tokens).toHaveLength(500);
+        const paths = tokens.flatMap((_, index) =>
+            index % 20 === 0 ? service.pathsForTokens(tokens.slice(index, index + 20)) : [],
+        );
+        expect(paths).toHaveLength(500);
+    });
+
+    it("rejects a token if an ancestor is replaced by a symlink outside the root", async () => {
+        const root = createRoot();
+        const outside = createRoot();
+        const orderDirectory = join(root, "2026", "augustus", "0088653");
+        mkdirSync(orderDirectory, { recursive: true });
+        writeFileSync(join(orderDirectory, "proefdruk.pdf"), "inside");
+        writeFileSync(join(outside, "proefdruk.pdf"), "outside");
+        const service = new OrderFilesService(root);
+        const result = await service.browse({ segments: ["2026", "augustus", "0088653"] });
+        const token = result.entries[0]?.id;
+
+        rmSync(orderDirectory, { recursive: true });
+        symlinkSync(outside, orderDirectory, "dir");
+
+        expect(service.pathsForTokens([token])).toEqual([]);
     });
 });

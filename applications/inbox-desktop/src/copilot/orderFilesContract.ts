@@ -2,6 +2,8 @@ export const ORDER_FILES_BROWSE_CHANNEL = "colorspace-order-files:browse";
 export const ORDER_FILES_OPEN_CHANNEL = "colorspace-order-files:open";
 export const ORDER_FILES_REVEAL_CHANNEL = "colorspace-order-files:reveal";
 export const ORDER_FILES_DRAG_CHANNEL = "colorspace-order-files:drag";
+export const ORDER_FILES_ATTACH_CHANNEL = "colorspace-order-files:attach";
+export const ORDER_FILES_SAVE_MAIL_ATTACHMENTS_CHANNEL = "colorspace-order-files:save-mail-attachments";
 
 export type OrderFilesBrowseRequest = {
     segments?: string[];

@@ -26,11 +26,13 @@ normal Proton Mail operation.
 
 ### Local order files
 
-The Copilot sidecar can browse the mounted, read-only order archive without
+The Copilot sidecar can browse the mounted order archive without
 exposing filesystem paths to the hosted Copilot page. By default the desktop
 app uses `/Volumes/webbestellingen` and resolves an order through
 `<year>/<Dutch month>/<order number>`. Files can be opened, revealed in Finder,
-or dragged from the sidecar into a Proton composer.
+dragged or explicitly added to a Proton composer. Attachments from the selected
+Proton message can also be decrypted and saved directly into the resolved order
+folder. That save action requires the order folder to be writable.
 
 For development, the fixed root can be overridden before launching Electron:
 

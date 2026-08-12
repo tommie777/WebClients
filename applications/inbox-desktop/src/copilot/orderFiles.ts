@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, lstatSync } from "node:fs";
-import { lstat, readdir, realpath } from "node:fs/promises";
+import { constants, existsSync, lstatSync, realpathSync } from "node:fs";
+import { access, lstat, readdir, realpath } from "node:fs/promises";
 import { basename, extname, isAbsolute, relative, resolve, sep } from "node:path";
 
 import type {
@@ -152,10 +152,29 @@ export class OrderFilesService {
     }
 
     private rememberFile(path: string): string {
-        if (this.fileTokens.size >= MAX_TOKENS) this.fileTokens.clear();
+        if (this.fileTokens.size >= MAX_TOKENS) {
+            const oldestToken = this.fileTokens.keys().next().value;
+            if (oldestToken) this.fileTokens.delete(oldestToken);
+        }
         const id = randomUUID();
         this.fileTokens.set(id, path);
         return id;
+    }
+
+    async writableOrderDirectory(request: OrderFilesBrowseRequest): Promise<string | null> {
+        const root = await this.resolveRoot();
+        const orderNumber = cleanOrderNumber(request.orderNumber);
+        if (!root || !orderNumber) return null;
+        const segments = await this.resolveOrderSegments(root, orderNumber, request.orderDate);
+        if (!segments) return null;
+        const directory = await this.directoryForSegments(root, segments);
+        if (!directory) return null;
+        try {
+            await access(directory, constants.W_OK);
+            return directory;
+        } catch {
+            return null;
+        }
     }
 
     async browse(request: OrderFilesBrowseRequest): Promise<OrderFilesBrowseResult> {
@@ -276,13 +295,15 @@ export class OrderFilesService {
             .slice(0, 20)
             .flatMap((token) => (typeof token === "string" ? [this.fileTokens.get(token)] : []))
             .filter((path): path is string => Boolean(path))
-            .filter((path) => {
-                if (!this.rootPath || !isWithin(this.rootPath, path) || !existsSync(path)) return false;
+            .flatMap((path) => {
+                if (!this.rootPath || !isWithin(this.rootPath, path) || !existsSync(path)) return [];
                 try {
-                    const stats = lstatSync(path);
-                    return stats.isFile() && !stats.isSymbolicLink();
+                    const resolvedPath = realpathSync(path);
+                    if (!this.rootPath || !isWithin(this.rootPath, resolvedPath)) return [];
+                    const stats = lstatSync(resolvedPath);
+                    return stats.isFile() && !stats.isSymbolicLink() ? [resolvedPath] : [];
                 } catch {
-                    return false;
+                    return [];
                 }
             });
         return [...new Set(paths)];

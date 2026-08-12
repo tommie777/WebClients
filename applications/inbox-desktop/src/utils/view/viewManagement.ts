@@ -53,13 +53,23 @@ import { isUserNetworkErrorCode, NET_ERROR_CODE } from "../netErrors";
 import { getFileResourcePath, getIconResourcePath } from "../../constants/resources";
 import { getCopilotSidecarLayout } from "../../copilot/sidecarLayout";
 import { OrderFilesService, failedAction, successfulAction } from "../../copilot/orderFiles";
+import { attachOrderFilesToComposer, saveSelectedMailAttachments } from "../../copilot/orderFileMailActions";
+import { enableMailContentSearch, openMailOrderSearch, readMailContentSearchStatus } from "../../copilot/mailSearch";
 import {
+    MAIL_SEARCH_ENABLE_CHANNEL,
+    MAIL_SEARCH_OPEN_CHANNEL,
+    MAIL_SEARCH_STATUS_CHANNEL,
+} from "../../copilot/mailSearchContract";
+import {
+    ORDER_FILES_ATTACH_CHANNEL,
     ORDER_FILES_BROWSE_CHANNEL,
     ORDER_FILES_DRAG_CHANNEL,
     ORDER_FILES_OPEN_CHANNEL,
     ORDER_FILES_REVEAL_CHANNEL,
+    ORDER_FILES_SAVE_MAIL_ATTACHMENTS_CHANNEL,
     type OrderFilesBrowseRequest,
 } from "../../copilot/orderFilesContract";
+import { selectedMailFromURL } from "../../copilot/selectedMail";
 import pkg from "../../../package.json";
 import { copilotAppURL } from "../../copilot/backendConfig";
 import { appSession } from "../session";
@@ -364,6 +374,69 @@ const createCopilotSidecarView = () => {
         const icon = nativeImage.createFromPath(getIconResourcePath("colorspace-copilot.png"));
         if (icon.isEmpty()) return;
         event.sender.startDrag({ file: files[0], files, icon });
+    });
+    view.webContents.ipc.handle(ORDER_FILES_ATTACH_CHANNEL, async (event, ids: unknown) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return failedAction("Bestanden kunnen alleen vanuit het Copilot-paneel worden toegevoegd.");
+        }
+        const files = orderFilesService.pathsForTokens(ids);
+        if (!files.length) return failedAction("Selecteer eerst één of meer bestanden.");
+        const mailContents = viewMap.mail?.webContents;
+        if (!mailContents) return failedAction("Proton Mail is niet beschikbaar.");
+        return attachOrderFilesToComposer(mailContents, files);
+    });
+    view.webContents.ipc.handle(
+        ORDER_FILES_SAVE_MAIL_ATTACHMENTS_CHANNEL,
+        async (event, request: OrderFilesBrowseRequest) => {
+            if (event.senderFrame !== view.webContents.mainFrame) {
+                return failedAction("Bijlagen kunnen alleen vanuit het Copilot-paneel worden opgeslagen.");
+            }
+            const directory = await orderFilesService.writableOrderDirectory(request ?? {});
+            if (!directory) {
+                return failedAction("De ordermap is niet gevonden of is niet beschrijfbaar.");
+            }
+            const mailContents = viewMap.mail?.webContents;
+            if (!mailContents) return failedAction("Proton Mail is niet beschikbaar.");
+            const messageID = selectedMailFromURL(mailContents.getURL())?.messageID;
+            return saveSelectedMailAttachments(mailContents, directory, messageID);
+        },
+    );
+    view.webContents.ipc.handle(MAIL_SEARCH_STATUS_CHANNEL, (event) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return {
+                mode: "unavailable",
+                progress: null,
+                indexedMessages: null,
+                totalMessages: null,
+                message: "De zoekstatus is alleen beschikbaar in het Copilot-paneel.",
+            };
+        }
+        const mailContents = viewMap.mail?.webContents;
+        return mailContents
+            ? readMailContentSearchStatus(mailContents)
+            : {
+                  mode: "unavailable",
+                  progress: null,
+                  indexedMessages: null,
+                  totalMessages: null,
+                  message: "Proton Mail is niet beschikbaar.",
+              };
+    });
+    view.webContents.ipc.handle(MAIL_SEARCH_ENABLE_CHANNEL, (event) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return failedAction("Zoeken in e-mailinhoud kan alleen vanuit het Copilot-paneel worden ingeschakeld.");
+        }
+        const mailContents = viewMap.mail?.webContents;
+        return mailContents ? enableMailContentSearch(mailContents) : failedAction("Proton Mail is niet beschikbaar.");
+    });
+    view.webContents.ipc.handle(MAIL_SEARCH_OPEN_CHANNEL, (event, orderNumber: unknown) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return failedAction("Zoeken kan alleen vanuit het Copilot-paneel worden gestart.");
+        }
+        const mailContents = viewMap.mail?.webContents;
+        return mailContents
+            ? openMailOrderSearch(mailContents, orderNumber)
+            : failedAction("Proton Mail is niet beschikbaar.");
     });
     view.webContents.on("ipc-message", (_event, channel, ...args) => {
         if (channel !== "colorspace-copilot-sidecar-width") return;
