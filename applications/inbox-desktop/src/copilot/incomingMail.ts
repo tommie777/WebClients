@@ -176,18 +176,20 @@ const extractInBackground = async (pending: PendingIncomingMail): Promise<Normal
             backgroundThrottling: false,
         },
     });
-    view.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+    // The view drops its webContents property after close; retain the handle.
+    const contents = view.webContents;
+    contents.setWindowOpenHandler(() => ({ action: "deny" }));
     const deadline = setTimeout(() => {
-        if (!view.webContents.isDestroyed()) view.webContents.close({ waitForBeforeUnload: false });
+        if (!contents.isDestroyed()) contents.close({ waitForBeforeUnload: false });
     }, 15_000);
     try {
-        await view.webContents.loadURL(targetURL(pending));
+        await contents.loadURL(targetURL(pending));
         for (let attempt = 0; attempt < 50; attempt += 1) {
-            if (view.webContents.isDestroyed()) return null;
+            if (contents.isDestroyed()) return null;
             await wait(attempt === 0 ? 750 : 400);
             try {
                 const extracted = await executePageFunction<ExtractedIncomingMail>(
-                    view.webContents,
+                    contents,
                     extractIncomingMailInPage,
                 );
                 const normalized = normalizeIncomingMail(extracted, pending);
@@ -199,7 +201,7 @@ const extractInBackground = async (pending: PendingIncomingMail): Promise<Normal
         return null;
     } finally {
         clearTimeout(deadline);
-        if (!view.webContents.isDestroyed()) view.webContents.close({ waitForBeforeUnload: false });
+        if (!contents.isDestroyed()) contents.close({ waitForBeforeUnload: false });
     }
 };
 
