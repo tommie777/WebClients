@@ -100,15 +100,19 @@ function extractIncomingMailInPage(): ExtractedIncomingMail {
                 sentAt: header?.querySelector("time")?.getAttribute("datetime") || undefined,
                 bodyText,
                 addresses,
+                latest: container === containers[containers.length - 1],
             },
         ];
     });
     const latestInbound = [...messages].reverse().find((message) => message.direction === "inbound");
+    const latestReady = messages.some((message) => message.latest);
     return {
-        complete: collapsed.length === 0 && messages.length === containers.length,
+        // Older quoted messages can fail decryption independently. Do not hold
+        // a newly received, readable message behind that historical backlog.
+        complete: latestReady && Boolean(latestInbound),
         subject,
         senderEmail: latestInbound?.addresses?.[0],
-        messages: messages.map(({ addresses, ...message }) => message),
+        messages: messages.map(({ addresses, latest, ...message }) => message),
     };
 }
 
@@ -173,9 +177,13 @@ const extractInBackground = async (pending: PendingIncomingMail): Promise<Normal
         },
     });
     view.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+    const deadline = setTimeout(() => {
+        if (!view.webContents.isDestroyed()) view.webContents.close({ waitForBeforeUnload: false });
+    }, 15_000);
     try {
         await view.webContents.loadURL(targetURL(pending));
         for (let attempt = 0; attempt < 50; attempt += 1) {
+            if (view.webContents.isDestroyed()) return null;
             await wait(attempt === 0 ? 750 : 400);
             try {
                 const extracted = await executePageFunction<ExtractedIncomingMail>(
@@ -190,6 +198,7 @@ const extractInBackground = async (pending: PendingIncomingMail): Promise<Normal
         }
         return null;
     } finally {
+        clearTimeout(deadline);
         if (!view.webContents.isDestroyed()) view.webContents.close({ waitForBeforeUnload: false });
     }
 };
@@ -205,7 +214,7 @@ const writeQueue = (items: PendingIncomingMail[]) => {
     queueStore.set("pendingIncomingMail", items.slice(-MAX_QUEUE_ITEMS));
 };
 
-const retryDelay = (attempts: number) => Math.min(5 * 60_000, 15_000 * 2 ** Math.min(attempts, 4));
+const retryDelay = (attempts: number) => Math.min(30 * 60_000, 5_000 * 2 ** Math.min(attempts, 9));
 
 const scheduleDrain = (delay = 0) => {
     clearTimeout(retryTimer);
@@ -216,7 +225,8 @@ const drainQueue = async (): Promise<void> => {
     if (processing) return;
     const endpoint = copilotBackgroundIndexEndpoint();
     if (!endpoint || !copilotBridgeToken()) return;
-    const queue = readQueue();
+    // Fresh mail goes first; repeatedly failing historical items cannot starve it.
+    const queue = readQueue().sort((left, right) => left.attempts - right.attempts || left.nextAttemptAt - right.nextAttemptAt);
     const index = queue.findIndex((item) => item.nextAttemptAt <= Date.now());
     if (index < 0) {
         const next = queue.reduce((earliest, item) => Math.min(earliest, item.nextAttemptAt), Infinity);
@@ -243,6 +253,8 @@ const drainQueue = async (): Promise<void> => {
             signal: AbortSignal.timeout(10_000),
         });
         if (!response.ok) throw new Error(`Mail Copilot returned HTTP ${response.status}`);
+        const acknowledgement = await response.json() as { indexed?: boolean };
+        if (acknowledgement.indexed !== true) throw new Error("Mail Copilot did not confirm indexing");
         writeQueue(readQueue().filter((item) => item.key !== pending.key));
         mainLogger.info("Work Copilot indexed an incoming Proton message", pending.elementID);
     } catch (error) {
@@ -288,10 +300,10 @@ export const queueIncomingMailForCopilot = (payload: ElectronNotification, local
         localID: localID ?? "0",
         receivedAt,
         attempts: 0,
-        nextAttemptAt: Date.now() + 2_000,
+        nextAttemptAt: Date.now() + 500,
     });
     writeQueue(current);
-    scheduleDrain(2_000);
+    scheduleDrain(500);
 };
 
 void app.whenReady().then(() => scheduleDrain(5_000));
