@@ -78,6 +78,10 @@ Deploy only when production release is authorized. Confirm `/api/health` reports
 
 A backend deployment does not update desktop installations. After merging desktop changes, update local ProtonCopilot `main`, validate, then use `npm run proton:install` from ColorspaceMailCopilot to build/install locally. Follow `CLIENT_INSTALLER.md` there to build and distribute signed installers. Record both backend and desktop commits for coordinated releases.
 
-## Initial migration
+## Repository enforcement and migration
 
-The backend `main` baseline was created from the deployed commit `487a327`. The existing desktop integration is being reviewed through its own PR into `main`; its two previously unpushed commits are included. Do not assume the integration is on `main` until that PR is merged.
+GitHub automatically deletes merged PR branches in both repositories. WebClients `main` requires a PR (including administrators), disallows force pushes and deletion, and does not require a second approver for this single-owner workflow. Desktop checks are currently run locally and recorded in the PR.
+
+The private backend repository cannot enable branch protection on the current GitHub plan (GitHub returned HTTP 403 requiring GitHub Pro or a public repository). It remains private. Its verification Action runs on PRs and main; contributors must follow the PR policy manually until the plan supports enforcement. The deployment script independently enforces clean main matching origin/main. Do not treat a green Action as enforced branch protection.
+
+The backend main baseline was created from deployed commit `487a327`. The initial workflow PR is `tommie777/ColorspaceMailCoPilot#1`; the existing desktop integration and its two previously unpushed commits are covered by `tommie777/WebClients#1`. Check those PRs for the migration merge and validation evidence. No migration step deploys production automatically.
