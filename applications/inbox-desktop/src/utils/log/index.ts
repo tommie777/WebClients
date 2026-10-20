@@ -170,10 +170,34 @@ export function initializeLog() {
 // High-freq requests that add a lot of noise to the logs. Non-200 responses are still recorded.
 const NET_LOG_SKIP_PATTERNS = [/\/assets\/static\//, /\/api\/calendar\/v1\//, /\/api\/core\/v4\/images/];
 
+const isExpectedExternalKeyMiss = (statusCode: number, rawURL: string): boolean => {
+    if (statusCode !== 422) return false;
+
+    try {
+        const url = new URL(rawURL);
+        const email = url.searchParams.get("Email") ?? "";
+        const domain = email.split("@")[1]?.toLowerCase();
+        return (
+            url.pathname.endsWith("/api/core/v4/keys/all") &&
+            url.searchParams.get("InternalOnly") === "1" &&
+            isEmail(email) &&
+            Boolean(domain) &&
+            !protonDomains.includes(domain)
+        );
+    } catch {
+        return false;
+    }
+};
+
 export async function connectNetLogger(
     getWebContentsViewName: (webContents: WebContents) => CHANGE_VIEW_TARGET | null,
 ) {
     webRequestRouter.onCompleted((details) => {
+        // Proton uses 422 to report that an external recipient has no internal
+        // Proton key. The caller handles that expected result and continues
+        // normally, so it should not be presented as an application error.
+        if (isExpectedExternalKeyMiss(details.statusCode, details.url)) return;
+
         const viewName = details.webContents ? getWebContentsViewName(details.webContents) : null;
         if (details.webContents && viewName) {
             setViewName(details.webContents.id, viewName);
@@ -211,3 +235,4 @@ export function clearLogs() {
 
 // Exported because we want to test we only change sensitve part of LogMessage
 export const filterSensitiveLogMessageTestOnly = filterSensitiveLogMessage;
+export const isExpectedExternalKeyMissTestOnly = isExpectedExternalKeyMiss;

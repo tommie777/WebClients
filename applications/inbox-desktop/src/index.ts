@@ -46,6 +46,7 @@ import { quitTracker } from "./utils/log/quitTracker";
     const PROFILER_IIFE_START_PERF = performance.now();
 
     const isPlaywrightTest = process.env.PLAYWRIGHT_TEST === "true";
+    const isColorspaceCopilot = pkg.config.colorspaceCopilot;
 
     // Prevent remote debugging through CDP (Chrome Dev-Tools Protocol)
     if (!isPlaywrightTest) preventRemoteDebugging();
@@ -56,12 +57,12 @@ import { quitTracker } from "./utils/log/quitTracker";
     captureUncaughtErrors();
     registerIOStreamErrorHandlers();
 
-    if (!isPlaywrightTest) {
+    if (!isPlaywrightTest && !isColorspaceCopilot) {
         await initializeSentry();
     }
     profiler.mark("sentry-done");
     logInitialAppInfo();
-    handleStartupMailto();
+    if (!isColorspaceCopilot) handleStartupMailto();
     handleStartupDeepLink();
 
     // Handle squirrel events at the very top of the application
@@ -167,14 +168,14 @@ import { quitTracker } from "./utils/log/quitTracker";
     quitTracker.register(getWebContentsViewName);
 
     handleSecondInstance();
-    checkDefaultProtocols();
+    if (!isColorspaceCopilot) checkDefaultProtocols();
     connectNetLogger(getWebContentsViewName);
     measureRequestTime();
 
-    initializeUpdateChecks();
+    if (!isColorspaceCopilot) initializeUpdateChecks();
     new Notification();
     handleIPCCalls();
-    handleAppReadyMailto();
+    if (!isColorspaceCopilot) handleAppReadyMailto();
     handleDeepLink();
     handleWinNotification();
 

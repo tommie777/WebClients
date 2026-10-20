@@ -1,4 +1,14 @@
-import { BrowserWindow, Event, Rectangle, WebContents, WebContentsView, app, nativeTheme } from "electron";
+import {
+    BrowserWindow,
+    Event,
+    Rectangle,
+    WebContents,
+    WebContentsView,
+    app,
+    nativeImage,
+    nativeTheme,
+    shell,
+} from "electron";
 import { debounce } from "lodash";
 import { getWindowBounds, saveWindowBounds } from "../../store/boundsStore";
 import { getSettings, updateSettings } from "../../store/settingsStore";
@@ -40,7 +50,31 @@ import { isWindowValid } from "./windowUtils";
 import { profiler } from "../profiler/profiler";
 import { sentryReport } from "../sentryReport";
 import { isUserNetworkErrorCode, NET_ERROR_CODE } from "../netErrors";
-import { getFileResourcePath } from "../../constants/resources";
+import { getFileResourcePath, getIconResourcePath } from "../../constants/resources";
+import { getCopilotSidecarLayout } from "../../copilot/sidecarLayout";
+import { OrderFilesService, failedAction, successfulAction } from "../../copilot/orderFiles";
+import { attachOrderFilesToComposer, saveSelectedMailAttachments } from "../../copilot/orderFileMailActions";
+import { enableMailContentSearch, openMailOrderSearch, readMailContentSearchStatus } from "../../copilot/mailSearch";
+import {
+    MAIL_SEARCH_ENABLE_CHANNEL,
+    MAIL_SEARCH_OPEN_CHANNEL,
+    MAIL_SEARCH_STATUS_CHANNEL,
+} from "../../copilot/mailSearchContract";
+import {
+    ORDER_FILES_ATTACH_CHANNEL,
+    ORDER_FILES_BROWSE_CHANNEL,
+    ORDER_FILES_DRAG_CHANNEL,
+    ORDER_FILES_OPEN_CHANNEL,
+    ORDER_FILES_REVEAL_CHANNEL,
+    ORDER_FILES_SAVE_MAIL_ATTACHMENTS_CHANNEL,
+    type OrderFilesBrowseRequest,
+} from "../../copilot/orderFilesContract";
+import { selectedMailFromURL } from "../../copilot/selectedMail";
+import pkg from "../../../package.json";
+import { copilotAppURL } from "../../copilot/backendConfig";
+import { appSession } from "../session";
+
+declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 type ViewID = keyof URLConfig;
 
@@ -83,6 +117,18 @@ const viewTitleMap: Record<ViewID, string> = {
 const PRELOADED_VIEWS: ViewID[] = ["mail", "calendar"];
 let mainWindow: BrowserWindow | null = null;
 let loadingView: WebContentsView | null = null;
+let attachedPrimaryView: WebContentsView | null = null;
+let copilotSidecarView: WebContentsView | null = null;
+let copilotSidecarAttached = false;
+let copilotReloadTimer: NodeJS.Timeout | undefined;
+let copilotSidecarWidth: number | undefined;
+const saveCopilotSidecarWidth = debounce((width: number) => {
+    updateSettings({ colorspaceCopilotSidecarWidth: width });
+}, 300);
+
+const colorspaceCopilotEnabled = pkg.config.colorspaceCopilot;
+const copilotSidecarURL = copilotAppURL().toString();
+const orderFilesService = new OrderFilesService();
 
 export const IGNORED_NET_ERROR_CODES: number[] = [NET_ERROR_CODE.ABORTED];
 
@@ -234,6 +280,9 @@ const createViews = () => {
     viewMap.mail = createView("mail");
     viewMap.calendar = createView("calendar");
     viewMap.account = createView("account");
+    if (colorspaceCopilotEnabled) {
+        copilotSidecarView = createCopilotSidecarView();
+    }
 
     if (isWindows) {
         mainWindow!.setMenuBarVisibility(false);
@@ -247,13 +296,200 @@ const createViews = () => {
         if (!isWindowValid(mainWindow)) {
             return;
         }
-
-        const bounds = mainWindow.getBounds();
-        viewMap.mail?.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
-        viewMap.calendar?.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
-        viewMap.account?.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
-        loadingView?.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
+        updateAttachedViewBounds();
     });
+};
+
+const createCopilotSidecarView = () => {
+    copilotSidecarWidth = getSettings().colorspaceCopilotSidecarWidth;
+    const view = new WebContentsView({
+        webPreferences: {
+            session: appSession(),
+            contextIsolation: true,
+            nodeIntegration: false,
+            sandbox: true,
+            preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+        },
+    });
+    view.setBackgroundColor("#edf2f4");
+
+    const load = () => {
+        if (!view.webContents.isDestroyed()) {
+            void view.webContents.loadURL(copilotSidecarURL);
+        }
+    };
+    view.webContents.on("did-fail-load", (_event, errorCode, _description, _url, isMainFrame) => {
+        if (!isMainFrame || errorCode === NET_ERROR_CODE.ABORTED) {
+            return;
+        }
+        clearTimeout(copilotReloadTimer);
+        copilotReloadTimer = setTimeout(load, 2_500);
+    });
+    view.webContents.setWindowOpenHandler(({ url }) => {
+        if (/^https:\/\//i.test(url)) {
+            void shell.openExternal(url);
+        }
+        return { action: "deny" };
+    });
+    view.webContents.on("will-navigate", (event, url) => {
+        if (new URL(url).origin !== new URL(copilotSidecarURL).origin) {
+            event.preventDefault();
+        }
+    });
+    view.webContents.ipc.handle(ORDER_FILES_BROWSE_CHANNEL, (event, request: OrderFilesBrowseRequest) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return {
+                available: false,
+                rootName: "webbestellingen",
+                segments: [],
+                entries: [],
+                resolvedOrder: false,
+                message: "Bestanden kunnen alleen vanuit het Copilot-paneel worden geopend.",
+            };
+        }
+        return orderFilesService.browse(request ?? {});
+    });
+    view.webContents.ipc.handle(ORDER_FILES_OPEN_CHANNEL, async (event, id: unknown) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return failedAction("Dit bestand kan niet vanuit dit venster worden geopend.");
+        }
+        const filePath = orderFilesService.filePathForToken(id);
+        if (!filePath) return failedAction("Het bestand bestaat niet meer of is niet toegankelijk.");
+        const error = await shell.openPath(filePath);
+        return error ? failedAction(error) : successfulAction();
+    });
+    view.webContents.ipc.handle(ORDER_FILES_REVEAL_CHANNEL, (event, id: unknown) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return failedAction("Dit bestand kan niet vanuit dit venster worden getoond.");
+        }
+        const filePath = orderFilesService.filePathForToken(id);
+        if (!filePath) return failedAction("Het bestand bestaat niet meer of is niet toegankelijk.");
+        shell.showItemInFolder(filePath);
+        return successfulAction();
+    });
+    view.webContents.ipc.on(ORDER_FILES_DRAG_CHANNEL, (event, ids: unknown) => {
+        if (event.senderFrame !== view.webContents.mainFrame) return;
+        const files = orderFilesService.pathsForTokens(ids);
+        if (!files.length) return;
+        const icon = nativeImage.createFromPath(getIconResourcePath("colorspace-copilot.png"));
+        if (icon.isEmpty()) return;
+        event.sender.startDrag({ file: files[0], files, icon });
+    });
+    view.webContents.ipc.handle(ORDER_FILES_ATTACH_CHANNEL, async (event, ids: unknown) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return failedAction("Bestanden kunnen alleen vanuit het Copilot-paneel worden toegevoegd.");
+        }
+        const files = orderFilesService.pathsForTokens(ids);
+        if (!files.length) return failedAction("Selecteer eerst één of meer bestanden.");
+        const mailContents = viewMap.mail?.webContents;
+        if (!mailContents) return failedAction("Proton Mail is niet beschikbaar.");
+        return attachOrderFilesToComposer(mailContents, files);
+    });
+    view.webContents.ipc.handle(
+        ORDER_FILES_SAVE_MAIL_ATTACHMENTS_CHANNEL,
+        async (event, request: OrderFilesBrowseRequest) => {
+            if (event.senderFrame !== view.webContents.mainFrame) {
+                return failedAction("Bijlagen kunnen alleen vanuit het Copilot-paneel worden opgeslagen.");
+            }
+            const directory = await orderFilesService.writableOrderDirectory(request ?? {});
+            if (!directory) {
+                return failedAction("De ordermap is niet gevonden of is niet beschrijfbaar.");
+            }
+            const mailContents = viewMap.mail?.webContents;
+            if (!mailContents) return failedAction("Proton Mail is niet beschikbaar.");
+            const messageID = selectedMailFromURL(mailContents.getURL())?.messageID;
+            return saveSelectedMailAttachments(mailContents, directory, messageID);
+        },
+    );
+    view.webContents.ipc.handle(MAIL_SEARCH_STATUS_CHANNEL, (event) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return {
+                mode: "unavailable",
+                progress: null,
+                indexedMessages: null,
+                totalMessages: null,
+                message: "De zoekstatus is alleen beschikbaar in het Copilot-paneel.",
+            };
+        }
+        const mailContents = viewMap.mail?.webContents;
+        return mailContents
+            ? readMailContentSearchStatus(mailContents)
+            : {
+                  mode: "unavailable",
+                  progress: null,
+                  indexedMessages: null,
+                  totalMessages: null,
+                  message: "Proton Mail is niet beschikbaar.",
+              };
+    });
+    view.webContents.ipc.handle(MAIL_SEARCH_ENABLE_CHANNEL, (event) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return failedAction("Zoeken in e-mailinhoud kan alleen vanuit het Copilot-paneel worden ingeschakeld.");
+        }
+        const mailContents = viewMap.mail?.webContents;
+        return mailContents ? enableMailContentSearch(mailContents) : failedAction("Proton Mail is niet beschikbaar.");
+    });
+    view.webContents.ipc.handle(MAIL_SEARCH_OPEN_CHANNEL, (event, orderNumber: unknown) => {
+        if (event.senderFrame !== view.webContents.mainFrame) {
+            return failedAction("Zoeken kan alleen vanuit het Copilot-paneel worden gestart.");
+        }
+        const mailContents = viewMap.mail?.webContents;
+        return mailContents
+            ? openMailOrderSearch(mailContents, orderNumber)
+            : failedAction("Proton Mail is niet beschikbaar.");
+    });
+    view.webContents.on("ipc-message", (_event, channel, ...args) => {
+        if (channel !== "colorspace-copilot-sidecar-width") return;
+        const requestedWidth = Number(args[0]);
+        if (!Number.isFinite(requestedWidth)) return;
+        const bounds = mainWindow?.getContentBounds();
+        if (!bounds) return;
+        copilotSidecarWidth = getCopilotSidecarLayout(bounds.width, bounds.height, requestedWidth).sidecar.width;
+        saveCopilotSidecarWidth(copilotSidecarWidth);
+        updateAttachedViewBounds();
+    });
+    load();
+    return view;
+};
+
+const shouldAttachCopilotSidecar = (view: WebContentsView) => {
+    return colorspaceCopilotEnabled && view === viewMap.mail && copilotSidecarView !== null;
+};
+
+const updateAttachedViewBounds = () => {
+    if (!isWindowValid(mainWindow) || !attachedPrimaryView) {
+        return;
+    }
+    const { width, height } = mainWindow.getContentBounds();
+    if (shouldAttachCopilotSidecar(attachedPrimaryView) && copilotSidecarView) {
+        const layout = getCopilotSidecarLayout(width, height, copilotSidecarWidth);
+        attachedPrimaryView.setBounds(layout.primary);
+        copilotSidecarView.setBounds(layout.sidecar);
+        return;
+    }
+    attachedPrimaryView.setBounds({ x: 0, y: 0, width, height });
+};
+
+const attachPrimaryView = (view: WebContentsView) => {
+    if (!isWindowValid(mainWindow)) {
+        return;
+    }
+    if (attachedPrimaryView && attachedPrimaryView !== view) {
+        mainWindow.contentView.removeChildView(attachedPrimaryView);
+    }
+    if (copilotSidecarAttached && copilotSidecarView) {
+        mainWindow.contentView.removeChildView(copilotSidecarView);
+        copilotSidecarAttached = false;
+    }
+    if (attachedPrimaryView !== view) {
+        mainWindow.contentView.addChildView(view);
+    }
+    attachedPrimaryView = view;
+    if (shouldAttachCopilotSidecar(view) && copilotSidecarView) {
+        mainWindow.contentView.addChildView(copilotSidecarView);
+        copilotSidecarAttached = true;
+    }
+    updateAttachedViewBounds();
 };
 
 const createBrowserWindow = () => {
@@ -278,7 +514,7 @@ function updateViewBounds(view: WebContentsView | undefined, viewID: ViewID | nu
         return;
     }
 
-    const { height: windowHeight, width: windowWidth } = mainWindow.getBounds();
+    const { height: windowHeight, width: windowWidth } = mainWindow.getContentBounds();
     let horizontalMargin = 0;
     let verticalMargin = 0;
 
@@ -303,6 +539,11 @@ function updateViewBounds(view: WebContentsView | undefined, viewID: ViewID | nu
         width: windowWidth - horizontalMargin,
         height: windowHeight - verticalMargin,
     };
+
+    if (view === attachedPrimaryView) {
+        updateAttachedViewBounds();
+        return;
+    }
 
     if (!view) {
         viewLogger(viewID).warn("cannot adjust view bounds, view is null");
@@ -385,21 +626,21 @@ export async function showView(viewID: CHANGE_VIEW_TARGET, url: string = "") {
         viewLogger(viewID).debug(`showView loading mailto ${url} from`, getViewURL(viewID));
         await showLoadingPage(viewTitleMap[viewID]);
         await loadURL(viewID, url);
-        mainWindow!.setContentView(view);
+        attachPrimaryView(view);
     } else if (url && urlHasOpenMailParams(url)) {
         viewLogger(viewID).debug(`showView loading open mail ${url} from`, getViewURL(viewID));
         await showLoadingPage(viewTitleMap[viewID]);
         await loadURL(viewID, url);
-        mainWindow!.setContentView(view);
+        attachPrimaryView(view);
     } else if (url && !isSameURL(url, getViewURL(viewID))) {
         viewLogger(viewID).debug("showView current url is different", getViewURL(viewID));
         viewLogger(viewID).info("showView loading", url);
         await showLoadingPage(viewTitleMap[viewID]);
         await loadURL(viewID, url);
-        mainWindow!.setContentView(view);
+        attachPrimaryView(view);
     } else {
         viewLogger(viewID).info("showView showing view for ", url);
-        mainWindow!.setContentView(view);
+        attachPrimaryView(view);
     }
 
     if (previousViewID === "account") {
@@ -648,7 +889,7 @@ async function showLoadingPage(title: string): Promise<void> {
     loadingView = new WebContentsView(isPlaywrightTest ? getWindowPlaywrightConfig() : getWindowConfig());
     await renderLoadingPage(loadingView, title);
 
-    mainWindow.setContentView(loadingView);
+    attachPrimaryView(loadingView);
 }
 
 async function renderLoadingPage(view: WebContentsView, title: string): Promise<void> {

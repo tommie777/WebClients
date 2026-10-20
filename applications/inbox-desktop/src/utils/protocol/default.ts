@@ -9,6 +9,9 @@ import { getAccountView, getMailView } from "../view/viewManagement";
 import { DESKTOP_FEATURES } from "../../ipc/ipcConstants";
 import { checkDeepLinks } from "./deep_links";
 import { getSettings, updateSettings } from "../../store/settingsStore";
+import pkg from "../../../package.json";
+
+const isColorspaceCopilot = pkg.config.colorspaceCopilot;
 
 export function checkDefaultProtocols() {
     checkDeepLinks();
@@ -23,7 +26,7 @@ let defaultMailtoDismissedPermanently = false;
 let defaultMailto: DefaultProtocol = {
     isDefault: false,
     wasChecked: false,
-    shouldBeDefault: DESKTOP_FEATURES.MailtoUpdate,
+    shouldBeDefault: isColorspaceCopilot ? false : DESKTOP_FEATURES.MailtoUpdate,
     wasDefaultInPast: false,
     lastReport: {
         wasDefault: false,
@@ -32,6 +35,8 @@ let defaultMailto: DefaultProtocol = {
 };
 
 export function checkDefaultMailto() {
+    if (isColorspaceCopilot) return;
+
     protocolLogger.debug("Checking default mailto");
     defaultMailto = loadDefaultProtocol("mailto");
 
@@ -77,6 +82,8 @@ export function setDefaultMailtoTelemetryReported(timestamp: number) {
 }
 
 export function setShouldCheckDefaultMailtoApp(shouldCheck: boolean) {
+    if (isColorspaceCopilot) return;
+
     protocolLogger.info("Requested to check if app default mailto. Current status:", shouldCheck);
     defaultMailto.canUpdateDefault = true;
     defaultMailto.shouldBeDefault = shouldCheck;
@@ -95,6 +102,8 @@ export function setShouldCheckDefaultMailtoApp(shouldCheck: boolean) {
 }
 
 export function setDefaultMailtoApp() {
+    if (isColorspaceCopilot) return;
+
     protocolLogger.info("Requested to set app as default mailto. Current status:", defaultMailto);
 
     if (isMac) setDefaultMailtoMac();

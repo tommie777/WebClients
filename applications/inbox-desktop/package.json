@@ -31,8 +31,9 @@
         "test": "jest --runInBand"
     },
     "config": {
-        "appBundleId": "ch.protonmail.desktop",
-        "appUserModelId": "com.squirrel.proton_mail.ProtonMail",
+        "appBundleId": "nl.colorspace.proton-copilot",
+        "appUserModelId": "nl.colorspace.proton-copilot",
+        "colorspaceCopilot": true,
         "copyright": "Copyright (c) Proton AG <contact@protonmail.com>",
         "githubRepo": "inbox-desktop",
         "githubUser": "ProtonMail",
@@ -94,5 +95,5 @@
     "minimumOsVersionLinux": "",
     "minimumOsVersionMacos": "11.0.0",
     "minimumOsVersionWindows": "",
-    "productName": "Proton Mail"
+    "productName": "Colorspace Proton Copilot"
 }

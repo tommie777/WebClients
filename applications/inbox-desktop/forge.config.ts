@@ -33,12 +33,7 @@ const config: ForgeConfig = {
         appVersion: pkg.version,
         appCopyright: pkg.config.copyright,
         // Required for macOS mailto protocol
-        protocols: [
-            {
-                name: "mailto",
-                schemes: ["mailto"],
-            },
-        ],
+        protocols: [],
         // Change category type of the application on macOS
         appCategoryType: "public.app-category.productivity",
         appBundleId: pkg.config.appBundleId,
@@ -54,7 +49,6 @@ const config: ForgeConfig = {
               }),
         extendInfo: {
             ...getAppTransportSecuity(),
-            CFBundleIconName: "Mail", // macOS26 customizable icons
         },
     },
     rebuildConfig: {},

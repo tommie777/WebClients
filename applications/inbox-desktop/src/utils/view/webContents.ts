@@ -38,8 +38,67 @@ import { sentryReport } from "../sentryReport";
 import { enableAppSwitcherMenuItems } from "../menus/menuApplication";
 import { openExternalRedirect } from "../openExternal/openExternal";
 import { urlRedirectManager } from "../urlRedirects/manager";
+import { notifyCopilotOfSelectedMail } from "../../copilot/selectedMail";
+import { installMailSidebarResize } from "../../copilot/mailSidebarResize";
+import { enableMailContentSearch, readMailContentSearchStatus } from "../../copilot/mailSearch";
+import pkg from "../../../package.json";
 
 const RENDERER_LOG_MAX_MESSAGE_LENGTH = 500;
+
+const ensureExpandedColorspaceMailSidebar = async (contents: WebContents) => {
+    if (!pkg.config.colorspaceCopilot) {
+        return;
+    }
+    try {
+        const changed = (await contents.executeJavaScript(`(() => {
+            let changed = false;
+            for (let index = 0; index < localStorage.length; index += 1) {
+                const key = localStorage.key(index);
+                if (key?.endsWith("-proton-mail-left-nav-opened") && localStorage.getItem(key) !== "true") {
+                    localStorage.setItem(key, "true");
+                    changed = true;
+                }
+            }
+            return changed;
+        })()`)) as boolean;
+        if (changed && !contents.isDestroyed()) {
+            mainLogger.info("Restoring expanded Proton Mail navigation for Colorspace Copilot");
+            contents.reload();
+        }
+    } catch {
+        // The renderer can navigate while the local preference is inspected.
+    }
+};
+
+const syncColorspaceMailBackground = async (contents: WebContents) => {
+    if (!pkg.config.colorspaceCopilot) {
+        return;
+    }
+    try {
+        const color = (await contents.executeJavaScript(`(() => {
+            const styles = getComputedStyle(document.documentElement);
+            return styles.getPropertyValue("--background-norm").trim()
+                || getComputedStyle(document.body).backgroundColor;
+        })()`)) as string;
+        if (color && !contents.isDestroyed()) {
+            getMailView()?.setBackgroundColor(color);
+        }
+    } catch {
+        // The renderer can navigate while its theme is inspected.
+    }
+};
+
+const automaticallyEnableColorspaceMailSearch = async (contents: WebContents) => {
+    if (!pkg.config.colorspaceCopilot) return;
+    await new Promise((resolve) => setTimeout(resolve, 4_000));
+    if (contents.isDestroyed()) return;
+    const status = await readMailContentSearchStatus(contents);
+    if (status.mode !== "not-enabled") return;
+    const result = await enableMailContentSearch(contents);
+    if (result.ok) {
+        mainLogger.info("Enabled Proton's local encrypted content search for Colorspace Copilot");
+    }
+};
 
 // Report renderer unresponsive once per session per view, as the event can fire repeatedly during a single hang episode.
 const unresponsiveReported = new Set<string>();
@@ -59,6 +118,17 @@ export function handleWebContents(contents: WebContents) {
         return getCurrentView()?.webContents === contents;
     };
 
+    contents.on("dom-ready", () => {
+        if (getWebContentsViewName(contents) === "mail") {
+            void ensureExpandedColorspaceMailSidebar(contents);
+            void syncColorspaceMailBackground(contents);
+            if (pkg.config.colorspaceCopilot) {
+                void installMailSidebarResize(contents);
+                void automaticallyEnableColorspaceMailSearch(contents);
+            }
+        }
+    });
+
     contents.on("did-navigate", async (_ev, url) => {
         logger().info("did-navigate", url);
 
@@ -74,6 +144,10 @@ export function handleWebContents(contents: WebContents) {
 
         if (!isCurrentContent()) {
             return;
+        }
+
+        if (getWebContentsViewName(contents) === "mail") {
+            void notifyCopilotOfSelectedMail(url, contents);
         }
 
         // App switch shortcuts should be disabled when the account is present. In some cases we can display
@@ -128,6 +202,10 @@ export function handleWebContents(contents: WebContents) {
 
         if (!isHostAllowed(url)) {
             return ev.preventDefault();
+        }
+
+        if (getWebContentsViewName(contents) === "mail") {
+            void notifyCopilotOfSelectedMail(url, contents);
         }
 
         if (isAccountLogin(url) || isAccountSwitch(url)) {

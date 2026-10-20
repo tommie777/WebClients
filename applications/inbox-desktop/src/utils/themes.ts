@@ -11,6 +11,7 @@ import { getAccountView, getCalendarView, getMailView, getMainWindow } from "./v
 import { ColorScheme, ThemeModeSetting, ThemeTypes } from "@proton/shared/lib/themes/constants";
 import { isWindowValid } from "./view/windowUtils";
 import { isMac } from "./helpers";
+import pkg from "../../package.json";
 
 export const SERIALIZED_THEME_MODE = {
     [ThemeModeSetting.Auto]: "auto",
@@ -120,7 +121,9 @@ export function isEqualTheme(themeA: ThemeSetting, themeB: ThemeSetting) {
 // Used such that we eliminate random white flashes during initial page loads
 function setThemeOnViews(colorTheme: string) {
     // Forcing a background color on macOS will disable the transparency effect.
-    if (isMac) return;
+    // The Colorspace build deliberately uses an opaque native window so its
+    // integrated sidecar and Proton navigation remain legible together.
+    if (isMac && !pkg.config.colorspaceCopilot) return;
 
     getMailView()?.setBackgroundColor(colorTheme);
     getCalendarView()?.setBackgroundColor(colorTheme);

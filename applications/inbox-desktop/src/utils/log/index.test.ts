@@ -1,6 +1,6 @@
 import { describe } from "@jest/globals";
 import { LogMessage } from "electron-log";
-import { filterSensitiveLogMessageTestOnly } from "./index";
+import { filterSensitiveLogMessageTestOnly, isExpectedExternalKeyMissTestOnly } from "./index";
 import { app } from "electron";
 
 jest.mock("electron", () => ({
@@ -27,6 +27,35 @@ const expectFilterSensitiveString = (given: string, want: string) => {
 };
 
 const expectFilterStringIsSame = (givenAndWant: string) => expectFilterSensitiveString(givenAndWant, givenAndWant);
+
+describe("expected network responses", () => {
+    it("recognizes only external InternalOnly key misses as expected 422 responses", () => {
+        expect(
+            isExpectedExternalKeyMissTestOnly(
+                422,
+                "https://mail.proton.me/api/core/v4/keys/all?Email=customer%40example.com&InternalOnly=1",
+            ),
+        ).toBe(true);
+        expect(
+            isExpectedExternalKeyMissTestOnly(
+                422,
+                "https://mail.proton.me/api/core/v4/keys/all?Email=employee%40proton.me&InternalOnly=1",
+            ),
+        ).toBe(false);
+        expect(
+            isExpectedExternalKeyMissTestOnly(
+                422,
+                "https://mail.proton.me/api/core/v4/keys/all?Email=customer%40example.com&InternalOnly=0",
+            ),
+        ).toBe(false);
+        expect(
+            isExpectedExternalKeyMissTestOnly(
+                500,
+                "https://mail.proton.me/api/core/v4/keys/all?Email=customer%40example.com&InternalOnly=1",
+            ),
+        ).toBe(false);
+    });
+});
 
 describe("filter sensitve data", () => {
     it("does not change ok stuff", () => {

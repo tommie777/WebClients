@@ -20,6 +20,7 @@ export interface SettingsStore {
     profilingMode?: "warm" | "cold";
     chromiumLoggingEnabled?: boolean;
     disableHardwareAcceleration?: boolean;
+    colorspaceCopilotSidecarWidth?: number;
 }
 
 const defaultSettings = {
