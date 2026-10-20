@@ -493,7 +493,7 @@ function replyInitiatedInPage(selectionElementID: string): boolean {
 }
 
 function clickConversationInPage(elementID: string): boolean {
-    const items = Array.from(document.querySelectorAll<HTMLElement>('[data-element-id]'));
+    const items = Array.from(document.querySelectorAll<HTMLElement>("[data-element-id]"));
     const target = items.find((item) => item.getAttribute("data-element-id") === elementID);
     if (!target || target.getClientRects().length === 0) return false;
     target.click();
@@ -528,9 +528,7 @@ const actionFromValue = (value: unknown): CopilotAction | null => {
             : null;
     }
     const draft = cleanText(record.draft, 4_000);
-    return id && selectionElementID && draft
-        ? { type: "insert-draft", id, selectionElementID, draft }
-        : null;
+    return id && selectionElementID && draft ? { type: "insert-draft", id, selectionElementID, draft } : null;
 };
 
 const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));

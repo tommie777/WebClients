@@ -2,6 +2,8 @@
 
 ## Colorspace Proton Copilot
 
+See [COLORSPACE_DEVELOPMENT.md](COLORSPACE_DEVELOPMENT.md) for the Colorspace branch, PR, validation and release workflow.
+
 Deze fork bevat een apart geïsoleerde desktopvariant voor de Colorspace Mail
 Copilot. De macOS-app gebruikt:
 

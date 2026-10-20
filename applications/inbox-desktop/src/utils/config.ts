@@ -29,11 +29,7 @@ export const getExtraResource = () => {
 
     switch (type()) {
         case "Darwin":
-            return [
-                ...commonResources,
-                "./src/macos/Proton Mail Uninstaller.app",
-                "./src/macos/uninstall.sh",
-            ];
+            return [...commonResources, "./src/macos/Proton Mail Uninstaller.app", "./src/macos/uninstall.sh"];
         case "Windows_NT":
             return [
                 ...commonResources,

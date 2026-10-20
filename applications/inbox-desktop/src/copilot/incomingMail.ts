@@ -188,10 +188,7 @@ const extractInBackground = async (pending: PendingIncomingMail): Promise<Normal
             if (contents.isDestroyed()) return null;
             await wait(attempt === 0 ? 750 : 400);
             try {
-                const extracted = await executePageFunction<ExtractedIncomingMail>(
-                    contents,
-                    extractIncomingMailInPage,
-                );
+                const extracted = await executePageFunction<ExtractedIncomingMail>(contents, extractIncomingMailInPage);
                 const normalized = normalizeIncomingMail(extracted, pending);
                 if (normalized) return normalized;
             } catch {
@@ -228,7 +225,9 @@ const drainQueue = async (): Promise<void> => {
     const endpoint = copilotBackgroundIndexEndpoint();
     if (!endpoint || !copilotBridgeToken()) return;
     // Fresh mail goes first; repeatedly failing historical items cannot starve it.
-    const queue = readQueue().sort((left, right) => left.attempts - right.attempts || left.nextAttemptAt - right.nextAttemptAt);
+    const queue = readQueue().sort(
+        (left, right) => left.attempts - right.attempts || left.nextAttemptAt - right.nextAttemptAt,
+    );
     const index = queue.findIndex((item) => item.nextAttemptAt <= Date.now());
     if (index < 0) {
         const next = queue.reduce((earliest, item) => Math.min(earliest, item.nextAttemptAt), Infinity);
@@ -255,7 +254,7 @@ const drainQueue = async (): Promise<void> => {
             signal: AbortSignal.timeout(10_000),
         });
         if (!response.ok) throw new Error(`Mail Copilot returned HTTP ${response.status}`);
-        const acknowledgement = await response.json() as { indexed?: boolean };
+        const acknowledgement = (await response.json()) as { indexed?: boolean };
         if (acknowledgement.indexed !== true) throw new Error("Mail Copilot did not confirm indexing");
         writeQueue(readQueue().filter((item) => item.key !== pending.key));
         mainLogger.info("Work Copilot indexed an incoming Proton message", pending.elementID);
